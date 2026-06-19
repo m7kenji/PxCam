@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SYS-V1.0.0 // PIXEL PATTERN FILTER - PROTOTYPE</title>
+    <!-- Technical & Monospace Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="app" class="app-layout">
+      <!-- Top Technical Header -->
+      <header class="panel-header border-bottom">
+        <div class="header-left">
+          <span class="status-indicator live-pulse"></span>
+          <h1 class="tech-title">PX-FILTER // DEVICE: CAM_SYS_01</h1>
+        </div>
+        <div class="header-right">
+          <span class="model-number">SPEC-ID: 480X-8X8-LBIT</span>
+          <span class="version-label">SYS_VER: 1.0.0_ALPHA</span>
+        </div>
+      </header>
+
+      <!-- Main Layout Grid -->
+      <main class="panel-main">
+        
+        <!-- Left Side: Camera Preview -->
+        <section class="panel-section border-right" id="camera-section">
+          <div class="section-header">
+            <span class="section-tag">[ 01 / LIVE_INPUT ]</span>
+            <span class="metadata-feed">SYS_STATUS: ACTIVE</span>
+          </div>
+          
+          <div class="visual-wrapper">
+            <div id="camera-container" class="aspect-box">
+              <!-- Corner Trim Marks (トンボ) -->
+              <div class="trim-mark trim-tl"></div>
+              <div class="trim-mark trim-tr"></div>
+              <div class="trim-mark trim-bl"></div>
+              <div class="trim-mark trim-br"></div>
+              
+              <!-- Hidden video element for feed -->
+              <video id="webcam" autoplay playsinline muted style="display: none;"></video>
+              <!-- Drawing Canvas -->
+              <canvas id="output-canvas"></canvas>
+            </div>
+          </div>
+
+          <div class="section-footer border-top">
+            <div class="tech-data">
+              <div>RES: <span id="val-res">480x480</span>px</div>
+              <div>RATE: <span id="val-fps">--</span>fps</div>
+              <div>MODE: QUAD_TREE_DITHER</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Right Side: Pattern Editor -->
+        <section class="panel-section" id="editor-section">
+          <div class="section-header border-bottom">
+            <span class="section-tag">[ 02 / MASK_DESIGNER ]</span>
+            <span class="metadata-feed">GRID: <span id="grid-size-label">8x8</span></span>
+          </div>
+
+          <div class="visual-wrapper">
+            <div id="editor-container" class="aspect-box">
+              <!-- Grid Container will be injected here -->
+              <div id="editor-grid"></div>
+            </div>
+          </div>
+
+          <div class="editor-controls border-top border-bottom">
+            <button id="btn-clear" class="btn-tech">CLEAR_GRID</button>
+            <button id="btn-invert" class="btn-tech">INVERT_GRID</button>
+            <div class="toggle-container">
+              <span class="toggle-label">GRID_SIZE:</span>
+              <button id="btn-toggle-grid-size" class="btn-tech font-bold">8x8</button>
+            </div>
+          </div>
+
+          <div class="section-footer">
+            <div class="palette-container">
+              <span class="palette-label">COLOR_PALETTE:</span>
+              <div id="palette-list" class="palette-list">
+                <!-- Color items injected by JS -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Bottom Panel Area (Technical logs / Barcodes / Controls) -->
+      <footer class="panel-footer border-top">
+        <!-- Technical Details & Barcode -->
+        <div class="footer-left">
+          <div class="barcode-container">
+            <svg class="barcode-svg" viewBox="0 0 100 20" xmlns="http://www.w3.org/2000/svg">
+              <!-- Fake industrial barcode -->
+              <rect x="0" y="0" width="3" height="20" fill="currentColor"/>
+              <rect x="5" y="0" width="1" height="20" fill="currentColor"/>
+              <rect x="8" y="0" width="2" height="20" fill="currentColor"/>
+              <rect x="12" y="0" width="4" height="20" fill="currentColor"/>
+              <rect x="18" y="0" width="1" height="20" fill="currentColor"/>
+              <rect x="21" y="0" width="3" height="20" fill="currentColor"/>
+              <rect x="26" y="0" width="2" height="20" fill="currentColor"/>
+              <rect x="30" y="0" width="1" height="20" fill="currentColor"/>
+              <rect x="33" y="0" width="5" height="20" fill="currentColor"/>
+              <rect x="40" y="0" width="2" height="20" fill="currentColor"/>
+              <rect x="44" y="0" width="1" height="20" fill="currentColor"/>
+              <rect x="47" y="0" width="3" height="20" fill="currentColor"/>
+              <rect x="52" y="0" width="4" height="20" fill="currentColor"/>
+              <rect x="58" y="0" width="1" height="20" fill="currentColor"/>
+              <rect x="61" y="0" width="2" height="20" fill="currentColor"/>
+              <rect x="65" y="0" width="3" height="20" fill="currentColor"/>
+              <rect x="70" y="0" width="1" height="20" fill="currentColor"/>
+              <rect x="73" y="0" width="5" height="20" fill="currentColor"/>
+              <rect x="80" y="0" width="2" height="20" fill="currentColor"/>
+              <rect x="84" y="0" width="4" height="20" fill="currentColor"/>
+              <rect x="90" y="0" width="1" height="20" fill="currentColor"/>
+              <rect x="93" y="0" width="3" height="20" fill="currentColor"/>
+              <rect x="98" y="0" width="2" height="20" fill="currentColor"/>
+            </svg>
+            <span class="barcode-text">SYS-ID-596645D7</span>
+          </div>
+          <div class="system-logs">
+            <span class="log-title">[SYSTEM_LOG]:</span>
+            <div id="log-feed" class="log-feed">
+              <div class="log-line">> BOOT_SEQUENCE: OK</div>
+              <div class="log-line">> WEBCAM_CONTROLLER: INITIALIZING...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shader Controls & Theme Toggle -->
+        <div class="footer-right">
+          <div class="shader-controls">
+            <div class="control-group">
+              <label for="slider-threshold">QT_THRESHOLD:</label>
+              <input type="range" id="slider-threshold" min="0.01" max="0.5" step="0.01" value="0.10">
+              <span id="val-threshold" class="slider-val">0.10</span>
+            </div>
+            <div class="control-group">
+              <label for="slider-depth">MAX_DEPTH:</label>
+              <input type="range" id="slider-depth" min="1" max="5" step="1" value="4">
+              <span id="val-depth" class="slider-val">4</span>
+            </div>
+          </div>
+          
+          <!-- Industrial Toggle Switch -->
+          <div class="theme-switch-container">
+            <span class="switch-label">SYS_COLOR_MODE:</span>
+            <label class="vintage-switch">
+              <input type="checkbox" id="theme-toggle">
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
