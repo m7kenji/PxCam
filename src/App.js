@@ -6,28 +6,81 @@ export class App {
   constructor() {
     this.theme = 'dark'; // 'dark' | 'light'
     this.patternSize = 8; // 8 | 16
+    this.activePatternIndex = 0; // Currently edited pattern slot (0 to 3)
     
-    // Default patterns
-    this.defaultPattern8 = [
-      0,0,1,1,1,1,0,0,
-      0,1,0,0,0,0,1,0,
-      1,0,1,0,0,1,0,1,
-      1,0,0,0,0,0,0,1,
-      1,0,1,0,0,1,0,1,
-      1,0,0,1,1,0,0,1,
-      0,1,0,0,0,0,1,0,
-      0,0,1,1,1,1,0,0
-    ]; // A classic 8x8 pixel mask
+    // Default patterns (8x8) from darkest to lightest tones
+    this.patterns8 = [
+      // Tone 0 (Darkest - dense grid)
+      [
+        1,1,1,1,1,1,1,1,
+        1,1,0,0,0,0,1,1,
+        1,0,1,0,0,1,0,1,
+        1,0,0,1,1,0,0,1,
+        1,0,0,1,1,0,0,1,
+        1,0,1,0,0,1,0,1,
+        1,1,0,0,0,0,1,1,
+        1,1,1,1,1,1,1,1
+      ],
+      // Tone 1 (Mid-Dark - retro diamond/box)
+      [
+        0,0,1,1,1,1,0,0,
+        0,1,0,0,0,0,1,0,
+        1,0,1,0,0,1,0,1,
+        1,0,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,1,
+        1,0,1,0,0,1,0,1,
+        0,1,0,0,0,0,1,0,
+        0,0,1,1,1,1,0,0
+      ],
+      // Tone 2 (Mid-Light - diagonal checkerboard)
+      [
+        1,0,1,0,1,0,1,0,
+        0,1,0,1,0,1,0,1,
+        1,0,1,0,1,0,1,0,
+        0,1,0,1,0,1,0,1,
+        1,0,1,0,1,0,1,0,
+        0,1,0,1,0,1,0,1,
+        1,0,1,0,1,0,1,0,
+        0,1,0,1,0,1,0,1
+      ],
+      // Tone 3 (Lightest - sparse dot/outer ring)
+      [
+        0,0,0,0,0,0,0,0,
+        0,0,0,1,1,0,0,0,
+        0,0,1,0,0,1,0,0,
+        0,1,0,0,0,0,1,0,
+        0,1,0,0,0,0,1,0,
+        0,0,1,0,0,1,0,0,
+        0,0,0,1,1,0,0,0,
+        0,0,0,0,0,0,0,0
+      ]
+    ];
 
-    this.defaultPattern16 = Array(256).fill(0).map((_, i) => {
-      const x = i % 16;
-      const y = Math.floor(i / 16);
-      // Generate procedural concentric circles/crosses
-      const dist = Math.sqrt((x - 7.5)**2 + (y - 7.5)**2);
-      return dist > 4 && dist < 7 ? 1 : 0;
-    });
-
-    this.patternData = [...this.defaultPattern8];
+    // Default patterns (16x16) generated procedurally
+    this.patterns16 = [
+      // Slot 0 (Dense rings)
+      Array(256).fill(0).map((_, i) => {
+        const x = i % 16; const y = Math.floor(i / 16);
+        const d = Math.sqrt((x - 7.5)**2 + (y - 7.5)**2);
+        return (d < 7.5 && d > 5.5) || (d < 4.5 && d > 2.5) || (d < 1) ? 1 : 0;
+      }),
+      // Slot 1 (Circle outline)
+      Array(256).fill(0).map((_, i) => {
+        const x = i % 16; const y = Math.floor(i / 16);
+        const d = Math.sqrt((x - 7.5)**2 + (y - 7.5)**2);
+        return (d < 6.5 && d > 4.5) ? 1 : 0;
+      }),
+      // Slot 2 (Cross hatch grid lines)
+      Array(256).fill(0).map((_, i) => {
+        const x = i % 16; const y = Math.floor(i / 16);
+        return (x + y) % 4 === 0 || (x - y) % 4 === 0 ? 1 : 0;
+      }),
+      // Slot 3 (Center targets)
+      Array(256).fill(0).map((_, i) => {
+        const x = i % 16; const y = Math.floor(i / 16);
+        return (x === 8 || y === 8) && (x > 3 && x < 13 && y > 3 && y < 13) ? 1 : 0;
+      })
+    ];
 
     // Premium Industrial Palettes (indexed color maps)
     this.palettes = [
@@ -48,12 +101,26 @@ export class App {
         colors: ['#0a0800', '#423300', '#9c7b00', '#f59e0b', '#fffbeb']
       }
     ];
-    this.activePaletteIndex = 0;
+    this.activePaletteIndex = 2;
 
     // References to controllers
     this.cameraController = null;
     this.editorUI = null;
     this.renderer = null;
+  }
+
+  // Active pattern set getter based on current pattern size
+  get patterns() {
+    return this.patternSize === 8 ? this.patterns8 : this.patterns16;
+  }
+
+  // Active single pattern data being edited
+  get patternData() {
+    return this.patterns[this.activePatternIndex];
+  }
+
+  set patternData(val) {
+    this.patterns[this.activePatternIndex] = val;
   }
 
   init() {
@@ -72,6 +139,10 @@ export class App {
     this.cameraController.init();
     this.editorUI.init();
     this.renderer.init();
+
+    // Resize snapping
+    this.handleResize();
+    window.addEventListener('resize', () => this.handleResize());
 
     // Render loop start
     this.startLoop();
@@ -104,7 +175,8 @@ export class App {
       btnClear.addEventListener('click', () => {
         this.patternData.fill(0);
         this.editorUI.updateGridFromState();
-        this.log('EDITOR: GRID CLEARED');
+        this.onPatternChanged();
+        this.log(`EDITOR: TONE ${this.activePatternIndex + 1} GRID CLEARED`);
       });
     }
 
@@ -112,9 +184,10 @@ export class App {
     const btnInvert = document.getElementById('btn-invert');
     if (btnInvert) {
       btnInvert.addEventListener('click', () => {
-        this.patternData = this.patternData.map(v => v === 1 ? 0 : 1);
+        this.patterns[this.activePatternIndex] = this.patternData.map(v => v === 1 ? 0 : 1);
         this.editorUI.updateGridFromState();
-        this.log('EDITOR: GRID INVERTED');
+        this.onPatternChanged();
+        this.log(`EDITOR: TONE ${this.activePatternIndex + 1} GRID INVERTED`);
       });
     }
 
@@ -141,6 +214,56 @@ export class App {
         this.log(`CONFIG: MAX_DEPTH ADJUSTED TO ${val}`);
       });
     }
+
+    // Tone Slots Selector Click Handling
+    const slotSelector = document.getElementById('slot-selector-container');
+    if (slotSelector) {
+      slotSelector.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-slot');
+        if (btn) {
+          const slotIdx = parseInt(btn.dataset.slot, 10);
+          this.activePatternIndex = slotIdx;
+          
+          // Update active class on buttons
+          slotSelector.querySelectorAll('.btn-slot').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          // Refresh grid editor contents
+          this.editorUI.updateGridFromState();
+          this.log(`EDITOR: SWITCHED TO TONE_${slotIdx + 1}`);
+        }
+      });
+    }
+
+    // Camera / Source Selector (Unifies test patterns and physical devices)
+    const selectCamera = document.getElementById('select-camera');
+    if (selectCamera) {
+      selectCamera.addEventListener('change', (e) => {
+        const val = e.target.value;
+        this.cameraController.requestCamera(val);
+        
+        const statusMeta = document.querySelector('#camera-section .metadata-feed');
+        if (statusMeta) {
+          if (val === 'test_shapes' || val === 'test_cloud') {
+            statusMeta.textContent = `SYS_STATUS: TEST_${val.slice(5).toUpperCase()}`;
+          } else {
+            statusMeta.textContent = 'SYS_STATUS: ACTIVE';
+          }
+        }
+      });
+    }
+
+    // Bypass Effect Toggle
+    const btnBypass = document.getElementById('btn-bypass');
+    if (btnBypass) {
+      btnBypass.addEventListener('click', () => {
+        const nextState = !this.renderer.config.bypassEffect;
+        this.renderer.config.bypassEffect = nextState;
+        
+        btnBypass.textContent = nextState ? 'ON' : 'OFF';
+        this.log(`CONFIG: BYPASS_EFFECT SWITCHED TO ${nextState ? 'ON' : 'OFF'}`);
+      });
+    }
   }
 
   setupPaletteUI() {
@@ -151,7 +274,6 @@ export class App {
     this.palettes.forEach((palette, idx) => {
       const item = document.createElement('div');
       item.className = `palette-color ${idx === this.activePaletteIndex ? 'active' : ''}`;
-      // Display first 2 vibrant colors or gradient
       item.style.background = `linear-gradient(135deg, ${palette.colors[2]} 0%, ${palette.colors[3]} 100%)`;
       item.title = palette.name;
       
@@ -175,11 +297,9 @@ export class App {
     if (label) label.textContent = `${size}x8` === '16x8' ? '16x16' : '8x8';
     if (btn) btn.textContent = `${size}x8` === '16x8' ? '16x16' : '8x8';
 
-    // Reload default patterns
-    this.patternData = size === 8 ? [...this.defaultPattern8] : [...this.defaultPattern16];
-    
     // Reinitialize grid layout
     this.editorUI.initGrid();
+    this.onPatternChanged();
     this.log(`SYS: GRID CONFIG CHANGED TO ${size}x${size}`);
   }
 
@@ -193,8 +313,46 @@ export class App {
   }
 
   // Handle updates from EditorUI
-  onPatternChanged(newData) {
-    this.patternData = newData;
+  onPatternChanged() {
+    if (this.renderer) {
+      this.renderer.updatePatternTexture();
+    }
+  }
+
+  // Pack the 4 patterns into a single Uint8Array for WebGL texture upload (2D Row-by-Row layout)
+  getPackedPatterns() {
+    const size = this.patternSize; // 8 or 16
+    const currentPatterns = this.patterns; // patterns8 or patterns16
+    const width = size * 4;
+    const height = size;
+    const packed = new Uint8Array(width * height);
+    
+    for (let y = 0; y < size; y++) {
+      for (let s = 0; s < 4; s++) {
+        const pattern = currentPatterns[s];
+        for (let x = 0; x < size; x++) {
+          const srcIdx = y * size + x;
+          const destIdx = y * width + (s * size + x);
+          packed[destIdx] = pattern[srcIdx] === 1 ? 255 : 0;
+        }
+      }
+    }
+    return packed;
+  }
+
+  // Convert current hex palette to Float32Array for WebGL uniforms
+  getPaletteFloatArray() {
+    const colors = this.palettes[this.activePaletteIndex].colors;
+    const floatArr = new Float32Array(5 * 3); // 5 colors, 3 floats each (RGB)
+    colors.forEach((color, idx) => {
+      const r = parseInt(color.slice(1, 3), 16) / 255;
+      const g = parseInt(color.slice(3, 5), 16) / 255;
+      const b = parseInt(color.slice(5, 7), 16) / 255;
+      floatArr[idx * 3] = r;
+      floatArr[idx * 3 + 1] = g;
+      floatArr[idx * 3 + 2] = b;
+    });
+    return floatArr;
   }
 
   // System logging utility
@@ -215,12 +373,44 @@ export class App {
   startLoop() {
     const tick = () => {
       if (this.cameraController && this.renderer) {
-        // Retrieve frame from CameraController
         const videoElement = this.cameraController.getVideoElement();
         this.renderer.render(videoElement);
       }
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
+  }
+
+  // Handle snapping of the aspect-boxes to integer multiples of 80px
+  handleResize() {
+    const wrappers = document.querySelectorAll('.visual-wrapper');
+    wrappers.forEach((wrapper) => {
+      const box = wrapper.querySelector('.aspect-box');
+      if (!box) return;
+
+      const availW = wrapper.clientWidth - 40; // Subtract padding
+      const availH = wrapper.clientHeight - 40;
+      const maxFit = Math.min(availW, availH);
+      
+      // Snap to the largest power of two that fits (256, 512, 1024) to ensure pixel-perfect scaling
+      let snappedSize = 256;
+      if (maxFit >= 1024) {
+        snappedSize = 1024;
+      } else if (maxFit >= 512) {
+        snappedSize = 512;
+      }
+      
+      box.style.width = `${snappedSize}px`;
+      box.style.height = `${snappedSize}px`;
+    });
+
+    // Notify Renderer of new canvas resolution to update target buffer
+    if (this.renderer && this.renderer.canvas) {
+      const box = this.renderer.canvas.parentElement;
+      const size = parseInt(box.style.width, 10) || 480;
+      if (this.renderer.canvas.width !== size) {
+        this.renderer.resize(size);
+      }
+    }
   }
 }

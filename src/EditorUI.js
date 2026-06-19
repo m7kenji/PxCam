@@ -78,7 +78,7 @@ export class EditorUI {
       cellElement.classList.remove('active');
     }
     // Notify the app of the change
-    this.app.onPatternChanged(this.app.patternData);
+    this.app.onPatternChanged();
   }
 
   setupGlobalPointerListeners() {

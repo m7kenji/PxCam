@@ -5,39 +5,39 @@
   --font-text: 'Roboto Mono', monospace;
   --transition-speed: 0.2s;
 
-  /* Theme: Dark (Cyber-Industrial) - Default */
+  /* Theme: Dark (Cyber-Industrial) - Default (Monotone Config) */
   --bg-color: #0d0d0d;
   --bg-panel: #141414;
   --bg-active: #222222;
   --border-color: #262626;
   --text-color: #e5e5e5;
   --text-muted: #737373;
-  --accent-color: #f59e0b; /* Warning Yellow */
-  --accent-rgb: 245, 158, 11;
+  --accent-color: #d9d9d9; /* Soft Cool Gray Accent */
+  --accent-rgb: 217, 217, 217;
   --grid-line-color: rgba(255, 255, 255, 0.07);
-  --cell-on-color: #f59e0b;
+  --cell-on-color: #d9d9d9;
   --cell-off-color: #171717;
   
   --barcode-opacity: 0.8;
-  --trim-color: #f59e0b;
+  --trim-color: #d9d9d9;
 }
 
 [data-theme="light"] {
-  /* Theme: Light (Technical Paper / Blueprints) */
+  /* Theme: Light (Technical Paper / Blueprints) - (Monotone Config) */
   --bg-color: #f4f1ea;
   --bg-panel: #ebe7dd;
   --bg-active: #dfdad0;
   --border-color: #171717; /* Solid Black Ink */
   --text-color: #171717;
   --text-muted: #525252;
-  --accent-color: #dc2626; /* Tech Red */
-  --accent-rgb: 220, 38, 38;
+  --accent-color: #171717; /* Black Accent */
+  --accent-rgb: 23, 23, 23;
   --grid-line-color: rgba(0, 0, 0, 0.1);
-  --cell-on-color: #dc2626;
+  --cell-on-color: #171717;
   --cell-off-color: #fcfbfa;
 
   --barcode-opacity: 1;
-  --trim-color: #dc2626;
+  --trim-color: #171717;
 }
 
 /* Global Reset & Base Setup */
@@ -288,6 +288,45 @@ body {
   background-color: var(--cell-on-color);
 }
 
+/* Slot Selector Tab Menu */
+.slot-selector {
+  display: flex;
+  height: 35px;
+  min-height: 35px;
+  background-color: var(--bg-color);
+}
+
+.btn-slot {
+  flex: 1;
+  height: 100%;
+  border: none;
+  border-right: 1px solid var(--border-color);
+  background-color: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-tech);
+  font-size: 0.75rem;
+  cursor: pointer;
+  outline: none;
+  transition: all var(--transition-speed) ease;
+  text-align: center;
+}
+
+.btn-slot:last-child {
+  border-right: none;
+}
+
+.btn-slot:hover {
+  color: var(--text-color);
+  background-color: var(--bg-active);
+}
+
+.btn-slot.active {
+  background-color: var(--bg-panel);
+  color: var(--accent-color);
+  font-weight: bold;
+  border-bottom: 2px solid var(--accent-color);
+}
+
 /* Control Interfaces */
 .editor-controls {
   height: 50px;
@@ -368,9 +407,11 @@ body {
 .section-footer {
   min-height: 40px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   background-color: var(--bg-color);
-  padding: 0 15px;
+  padding: 10px 15px;
+  gap: 8px;
 }
 
 .tech-data {
@@ -379,6 +420,29 @@ body {
   justify-content: space-between;
   font-size: 0.8rem;
   color: var(--text-muted);
+}
+
+.camera-controls {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.select-tech {
+  flex: 1;
+  background-color: var(--bg-panel);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  padding: 4px 8px;
+  font-family: var(--font-tech);
+  font-size: 0.8rem;
+  outline: none;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.select-tech:hover, .select-tech:focus {
+  border-color: var(--accent-color);
 }
 
 /* Footer Section */
