@@ -35,6 +35,10 @@ export class Renderer {
     this.lastTime = performance.now();
     this.fpsSmooth = 30;
     this.fpsUpdateCounter = 0;
+
+    // Source filter levels
+    this.brightness = 1.0;
+    this.contrast = 1.0;
   }
 
   init() {
@@ -297,6 +301,9 @@ export class Renderer {
     let sSize = Math.min(sw, sh);
     let sx = (sw - sSize) / 2;
     let sy = (sh - sSize) / 2;
+
+    // Apply brightness and contrast filters to the offscreen source frame
+    this.offscreenCtx.filter = `brightness(${this.brightness}) contrast(${this.contrast})`;
 
     this.offscreenCtx.drawImage(
       sourceVideo,

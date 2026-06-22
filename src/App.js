@@ -7,6 +7,8 @@ export class App {
     this.theme = 'dark'; // 'dark' | 'light'
     this.patternSize = 8; // 8 | 16
     this.activePatternIndex = 0; // Currently edited pattern slot (0 to 3)
+    this.brightness = 1.0;
+    this.contrast = 1.0;
     
     // Default patterns (8x8) from darkest to lightest tones
     this.patterns8 = [
@@ -102,6 +104,7 @@ export class App {
       }
     ];
     this.activePaletteIndex = 2;
+    this.currentPaletteColors = [...this.palettes[this.activePaletteIndex].colors];
 
     // References to controllers
     this.cameraController = null;
@@ -139,6 +142,13 @@ export class App {
     this.cameraController.init();
     this.editorUI.init();
     this.renderer.init();
+
+    // Set initial source filter values in renderer
+    this.renderer.brightness = this.brightness;
+    this.renderer.contrast = this.contrast;
+
+    // Synchronize custom color pickers with initial palette colors
+    this.updateColorPickersUI();
 
     // Resize snapping
     this.handleResize();
@@ -264,6 +274,59 @@ export class App {
         this.log(`CONFIG: BYPASS_EFFECT SWITCHED TO ${nextState ? 'ON' : 'OFF'}`);
       });
     }
+
+    // Slider: Brightness
+    const sliderBrightness = document.getElementById('slider-brightness');
+    const valBrightness = document.getElementById('val-brightness');
+    if (sliderBrightness && valBrightness) {
+      sliderBrightness.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        valBrightness.textContent = val.toFixed(2);
+        this.brightness = val;
+        if (this.renderer) {
+          this.renderer.brightness = val;
+        }
+        this.log(`CONFIG: BRIGHTNESS ADJUSTED TO ${val.toFixed(2)}`);
+      });
+    }
+
+    // Slider: Contrast
+    const sliderContrast = document.getElementById('slider-contrast');
+    const valContrast = document.getElementById('val-contrast');
+    if (sliderContrast && valContrast) {
+      sliderContrast.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        valContrast.textContent = val.toFixed(2);
+        this.contrast = val;
+        if (this.renderer) {
+          this.renderer.contrast = val;
+        }
+        this.log(`CONFIG: CONTRAST ADJUSTED TO ${val.toFixed(2)}`);
+      });
+    }
+
+    // Color pickers input listeners
+    for (let i = 0; i < 5; i++) {
+      const picker = document.getElementById(`picker-color-${i}`);
+      if (picker) {
+        picker.addEventListener('input', (e) => {
+          const color = e.target.value;
+          this.currentPaletteColors[i] = color;
+          this.onPatternChanged(); // Trigger renderer update
+        });
+        picker.addEventListener('change', (e) => {
+          this.log(`CONFIG: COLOR_${i + 1} ADJUSTED TO ${e.target.value.toUpperCase()}`);
+        });
+      }
+    }
+
+    // Random palette generator button
+    const btnRandom = document.getElementById('btn-random-palette');
+    if (btnRandom) {
+      btnRandom.addEventListener('click', () => {
+        this.generateRandomHarmonizedPalette();
+      });
+    }
   }
 
   setupPaletteUI() {
@@ -282,6 +345,76 @@ export class App {
       });
       paletteList.appendChild(item);
     });
+  }
+
+  updateColorPickersUI() {
+    this.currentPaletteColors.forEach((color, idx) => {
+      const picker = document.getElementById(`picker-color-${idx}`);
+      if (picker) {
+        picker.value = color;
+      }
+    });
+  }
+
+  generateRandomHarmonizedPalette() {
+    const isPsychedelic = Math.random() < 0.7;
+    const modeName = isPsychedelic ? 'PSYCHEDELIC' : 'VINTAGE';
+
+    // 1. Generate starting hue and ending hue (color shift)
+    const hueStart = Math.floor(Math.random() * 360);
+    let hueDiff;
+    let saturation;
+
+    if (isPsychedelic) {
+      // 60s Psychedelic: Strong complementaries / wide color shifts (90 to 180 degrees)
+      hueDiff = (Math.random() > 0.5 ? 1 : -1) * (90 + Math.floor(Math.random() * 90));
+      // Neon / vivid colors (65% to 95% saturation)
+      saturation = 65 + Math.floor(Math.random() * 30);
+    } else {
+      // Vintage Lo-Fi: Subtle harmonized complementary tones (30 to 90 degrees)
+      hueDiff = (Math.random() > 0.5 ? 1 : -1) * (30 + Math.floor(Math.random() * 60));
+      // Muted / retro colors (35% to 75% saturation)
+      saturation = 35 + Math.floor(Math.random() * 40);
+    }
+
+    const hueEnd = (hueStart + hueDiff + 360) % 360;
+
+    // 2. Interpolate 5 colors from dark to light
+    const newColors = [];
+    for (let i = 0; i < 5; i++) {
+      const ratio = i / 4; // 0.0 to 1.0
+      
+      // Interpolate hue linearly
+      const h = Math.round((hueStart * (1 - ratio) + hueEnd * ratio) + 360) % 360;
+      const s = saturation;
+      // Lightness scales strictly from 8% to 88% to preserve contrast
+      const l = Math.round(8 + ratio * 80);
+
+      newColors.push(this.hslToHex(h, s, l));
+    }
+
+    this.currentPaletteColors = newColors;
+    
+    // Clear active class from preset palettes since we are customized
+    const paletteList = document.getElementById('palette-list');
+    if (paletteList) {
+      paletteList.querySelectorAll('.palette-color').forEach(item => item.classList.remove('active'));
+    }
+
+    this.updateColorPickersUI();
+    this.onPatternChanged();
+    this.log(`SYS: GENERATED [${modeName}] PALETTE [H:${hueStart}°->${hueEnd}° S:${saturation}%]`);
+  }
+
+  hslToHex(h, s, l) {
+    l /= 100;
+    const a = (s * Math.min(l, 1 - l)) / 100;
+    const f = (n) => {
+      const k = (n + h / 30) % 12;
+      const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+      return Math.round(255 * color).toString(16).padStart(2, '0');
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
   }
 
   setTheme(theme) {
@@ -305,10 +438,11 @@ export class App {
 
   setPalette(index) {
     this.activePaletteIndex = index;
+    this.currentPaletteColors = [...this.palettes[index].colors];
     this.setupPaletteUI(); // Refresh active class
+    this.updateColorPickersUI(); // Update color pickers in UI
     
-    // Tell renderer to use new palette colors
-    this.renderer.setPalette(this.palettes[index].colors);
+    this.onPatternChanged(); // Notify renderer of palette color changes
     this.log(`SYS: PALETTE CHANGED TO [${this.palettes[index].name}]`);
   }
 
@@ -342,7 +476,7 @@ export class App {
 
   // Convert current hex palette to Float32Array for WebGL uniforms
   getPaletteFloatArray() {
-    const colors = this.palettes[this.activePaletteIndex].colors;
+    const colors = this.currentPaletteColors;
     const floatArr = new Float32Array(5 * 3); // 5 colors, 3 floats each (RGB)
     colors.forEach((color, idx) => {
       const r = parseInt(color.slice(1, 3), 16) / 255;

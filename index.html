@@ -54,6 +54,24 @@
               <div>RATE: <span id="val-fps">--</span>fps</div>
               <div>MODE: QUAD_TREE_DITHER</div>
             </div>
+            
+            <div class="source-controls border-top border-bottom">
+              <div class="control-group">
+                <label for="slider-brightness">BRIGHTNESS:</label>
+                <input type="range" id="slider-brightness" min="0.0" max="2.0" step="0.05" value="1.0">
+                <span id="val-brightness" class="slider-val">1.00</span>
+              </div>
+              <div class="control-group">
+                <label for="slider-contrast">CONTRAST:</label>
+                <input type="range" id="slider-contrast" min="0.0" max="2.0" step="0.05" value="1.0">
+                <span id="val-contrast" class="slider-val">1.00</span>
+              </div>
+              <div class="control-group bypass-group">
+                <label for="btn-bypass">BYPASS_EFFECT:</label>
+                <button id="btn-bypass" class="btn-tech">OFF</button>
+              </div>
+            </div>
+
             <div class="camera-controls">
               <select id="select-camera" class="select-tech">
                 <option value="test_shapes">[TEST] VECTOR_SHAPES</option>
@@ -94,10 +112,37 @@
           </div>
 
           <div class="section-footer">
+            <div class="render-controls border-bottom" style="padding-bottom: 8px; margin-bottom: 8px;">
+              <div class="control-group">
+                <label for="slider-threshold">QT_THRESHOLD:</label>
+                <input type="range" id="slider-threshold" min="0.01" max="0.5" step="0.01" value="0.20">
+                <span id="val-threshold" class="slider-val">0.20</span>
+              </div>
+              <div class="control-group">
+                <label for="slider-depth">MAX_DEPTH:</label>
+                <input type="range" id="slider-depth" min="1" max="7" step="1" value="6">
+                <span id="val-depth" class="slider-val">6</span>
+              </div>
+            </div>
+
             <div class="palette-container">
               <span class="palette-label">COLOR_PALETTE:</span>
               <div id="palette-list" class="palette-list">
                 <!-- Color items injected by JS -->
+              </div>
+            </div>
+
+            <div class="custom-colors-container border-top" style="padding-top: 8px; margin-top: 8px;">
+              <span class="palette-label">CUSTOMIZE_COLORS:</span>
+              <div class="custom-color-pickers-wrapper">
+                <div class="custom-color-pickers" id="custom-color-pickers">
+                  <input type="color" id="picker-color-0" class="color-picker-input" title="Color 1 (Darkest)">
+                  <input type="color" id="picker-color-1" class="color-picker-input" title="Color 2">
+                  <input type="color" id="picker-color-2" class="color-picker-input" title="Color 3">
+                  <input type="color" id="picker-color-3" class="color-picker-input" title="Color 4">
+                  <input type="color" id="picker-color-4" class="color-picker-input" title="Color 5 (Lightest)">
+                </div>
+                <button id="btn-random-palette" class="btn-tech" style="padding: 2px 8px; font-size: 0.75rem;">RANDOM</button>
               </div>
             </div>
           </div>
@@ -147,25 +192,8 @@
           </div>
         </div>
 
-        <!-- Shader Controls & Theme Toggle -->
+        <!-- Theme Toggle -->
         <div class="footer-right">
-          <div class="shader-controls">
-            <div class="control-group">
-              <label for="slider-threshold">QT_THRESHOLD:</label>
-              <input type="range" id="slider-threshold" min="0.01" max="0.5" step="0.01" value="0.20">
-              <span id="val-threshold" class="slider-val">0.20</span>
-            </div>
-            <div class="control-group">
-              <label for="slider-depth">MAX_DEPTH:</label>
-              <input type="range" id="slider-depth" min="1" max="7" step="1" value="6">
-              <span id="val-depth" class="slider-val">6</span>
-            </div>
-            <div class="control-group" style="border-top: 1px solid var(--border-color); padding-top: 4px; margin-top: 4px;">
-              <label for="btn-bypass">BYPASS_EFFECT:</label>
-              <button id="btn-bypass" class="btn-tech" style="padding: 2px 8px; font-size: 0.75rem; width: 60px;">OFF</button>
-            </div>
-          </div>
-          
           <!-- Industrial Toggle Switch -->
           <div class="theme-switch-container">
             <span class="switch-label">SYS_COLOR_MODE:</span>
