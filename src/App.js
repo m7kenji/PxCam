@@ -359,38 +359,60 @@ export class App {
   generateRandomHarmonizedPalette() {
     const isPsychedelic = Math.random() < 0.7;
     const modeName = isPsychedelic ? 'PSYCHEDELIC' : 'VINTAGE';
-
-    // 1. Generate starting hue and ending hue (color shift)
-    const hueStart = Math.floor(Math.random() * 360);
-    let hueDiff;
-    let saturation;
+    const newColors = [];
 
     if (isPsychedelic) {
-      // 60s Psychedelic: Strong complementaries / wide color shifts (90 to 180 degrees)
-      hueDiff = (Math.random() > 0.5 ? 1 : -1) * (90 + Math.floor(Math.random() * 90));
-      // Neon / vivid colors (65% to 95% saturation)
-      saturation = 65 + Math.floor(Math.random() * 30);
+      // 60s Psychedelic 2.0: Dynamic 3-phase color interpolation
+      const hStart = Math.floor(Math.random() * 360);
+      const hMid = (hStart + 60 + Math.floor(Math.random() * 120)) % 360;
+      const hEnd = (hMid + 60 + Math.floor(Math.random() * 120)) % 360;
+
+      // Vivid saturation (70% to 100%)
+      const saturation = 70 + Math.floor(Math.random() * 30);
+
+      // Randomize lightness limits so darks and brights are colorful (not just black/white)
+      const lStart = 5 + Math.floor(Math.random() * 20); // 5% to 25% (colorful darks)
+      const lEnd = 70 + Math.floor(Math.random() * 25);  // 70% to 95% (vivid brights)
+
+      for (let i = 0; i < 5; i++) {
+        const ratio = i / 4; // 0.0 to 1.0
+        
+        // HSL interpolation with a middle anchor at ratio = 0.5
+        let h;
+        if (ratio < 0.5) {
+          const t = ratio * 2; // 0.0 to 1.0
+          h = Math.round(hStart * (1 - t) + hMid * t);
+        } else {
+          const t = (ratio - 0.5) * 2; // 0.0 to 1.0
+          h = Math.round(hMid * (1 - t) + hEnd * t);
+        }
+        h = (h + 360) % 360;
+
+        const s = saturation;
+        const l = Math.round(lStart * (1 - ratio) + lEnd * ratio);
+
+        newColors.push(this.hslToHex(h, s, l));
+      }
     } else {
-      // Vintage Lo-Fi: Subtle harmonized complementary tones (30 to 90 degrees)
-      hueDiff = (Math.random() > 0.5 ? 1 : -1) * (30 + Math.floor(Math.random() * 60));
-      // Muted / retro colors (35% to 75% saturation)
-      saturation = 35 + Math.floor(Math.random() * 40);
-    }
-
-    const hueEnd = (hueStart + hueDiff + 360) % 360;
-
-    // 2. Interpolate 5 colors from dark to light
-    const newColors = [];
-    for (let i = 0; i < 5; i++) {
-      const ratio = i / 4; // 0.0 to 1.0
+      // Vintage Lo-Fi: Subtle harmonized complementary tones (2-phase)
+      const hStart = Math.floor(Math.random() * 360);
+      const hueDiff = (Math.random() > 0.5 ? 1 : -1) * (30 + Math.floor(Math.random() * 60));
+      const hEnd = (hStart + hueDiff + 360) % 360;
       
-      // Interpolate hue linearly
-      const h = Math.round((hueStart * (1 - ratio) + hueEnd * ratio) + 360) % 360;
-      const s = saturation;
-      // Lightness scales strictly from 8% to 88% to preserve contrast
-      const l = Math.round(8 + ratio * 80);
+      const saturation = 35 + Math.floor(Math.random() * 40);
 
-      newColors.push(this.hslToHex(h, s, l));
+      // Vintage standard lightness range (strictly dark to light)
+      const lStart = 8;
+      const lEnd = 88;
+
+      for (let i = 0; i < 5; i++) {
+        const ratio = i / 4;
+        const h = Math.round(((hStart * (1 - ratio) + hEnd * ratio) + 360) % 360);
+        const s = saturation;
+        const l = Math.round(lStart * (1 - ratio) + lEnd * ratio);
+
+        newColors.push(this.hslToHex(h, s, l));
+      }
     }
 
     this.currentPaletteColors = newColors;
@@ -403,7 +425,7 @@ export class App {
 
     this.updateColorPickersUI();
     this.onPatternChanged();
-    this.log(`SYS: GENERATED [${modeName}] PALETTE [H:${hueStart}°->${hueEnd}° S:${saturation}%]`);
+    this.log(`SYS: GENERATED [${modeName}] PALETTE (C1:${this.currentPaletteColors[0]} -> C5:${this.currentPaletteColors[4]})`);
   }
 
   hslToHex(h, s, l) {
