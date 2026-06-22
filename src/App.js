@@ -523,6 +523,7 @@ export class App {
 
   // Handle snapping of the aspect-boxes to integer multiples of 80px
   handleResize() {
+    const isMobile = window.innerWidth <= 768;
     const wrappers = document.querySelectorAll('.visual-wrapper');
     wrappers.forEach((wrapper) => {
       const box = wrapper.querySelector('.aspect-box');
@@ -530,7 +531,9 @@ export class App {
 
       const availW = wrapper.clientWidth - 40; // Subtract padding
       const availH = wrapper.clientHeight - 40;
-      const maxFit = Math.min(availW, availH);
+      
+      // On mobile, height is auto-scrolling, so fit strictly to available width
+      const maxFit = isMobile ? availW : Math.min(availW, availH);
       
       // Snap to the largest power of two that fits (256, 512, 1024) to ensure pixel-perfect scaling
       let snappedSize = 256;
