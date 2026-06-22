@@ -2,7 +2,7 @@
   "name": "PxCam Pixel Filter",
   "short_name": "PxCam",
   "start_url": "/PxCam/",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#0d0d0d",
   "theme_color": "#0d0d0d",
   "orientation": "portrait",
