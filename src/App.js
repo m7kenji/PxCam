@@ -225,26 +225,6 @@ export class App {
       });
     }
 
-    // Tone Slots Selector Click Handling
-    const slotSelector = document.getElementById('slot-selector-container');
-    if (slotSelector) {
-      slotSelector.addEventListener('click', (e) => {
-        const btn = e.target.closest('.btn-slot');
-        if (btn) {
-          const slotIdx = parseInt(btn.dataset.slot, 10);
-          this.activePatternIndex = slotIdx;
-          
-          // Update active class on buttons
-          slotSelector.querySelectorAll('.btn-slot').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-
-          // Refresh grid editor contents
-          this.editorUI.updateGridFromState();
-          this.log(`EDITOR: SWITCHED TO TONE_${slotIdx + 1}`);
-        }
-      });
-    }
-
     // Camera / Source Selector (Unifies test patterns and physical devices)
     const selectCamera = document.getElementById('select-camera');
     if (selectCamera) {
@@ -452,8 +432,9 @@ export class App {
     if (label) label.textContent = `${size}x8` === '16x8' ? '16x16' : '8x8';
     if (btn) btn.textContent = `${size}x8` === '16x8' ? '16x16' : '8x8';
 
-    // Reinitialize grid layout
+    // Reinitialize grid layouts
     this.editorUI.initGrid();
+    this.editorUI.initMiniGrids();
     this.onPatternChanged();
     this.log(`SYS: GRID CONFIG CHANGED TO ${size}x${size}`);
   }
@@ -472,6 +453,9 @@ export class App {
   onPatternChanged() {
     if (this.renderer) {
       this.renderer.updatePatternTexture();
+    }
+    if (this.editorUI) {
+      this.editorUI.updateMiniGrids();
     }
   }
 

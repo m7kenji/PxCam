@@ -88,21 +88,44 @@
             <span class="metadata-feed">GRID: <span id="grid-size-label">8x8</span></span>
           </div>
 
-          <div id="slot-selector-container" class="slot-selector border-bottom">
-            <button class="btn-slot active" data-slot="0">TONE_1 [DARK]</button>
-            <button class="btn-slot" data-slot="1">TONE_2 [M_DK]</button>
-            <button class="btn-slot" data-slot="2">TONE_3 [M_LT]</button>
-            <button class="btn-slot" data-slot="3">TONE_4 [LIGHT]</button>
+          <!-- Edit View Header (Located outside the aspect box to prevent canvas distortion) -->
+          <div id="editor-edit-header" class="edit-header border-bottom hidden">
+            <button id="btn-back-to-list" class="btn-tech">◀ RETURN</button>
+            <span id="active-edit-tag" class="section-tag">EDIT: TONE 1</span>
           </div>
 
           <div class="visual-wrapper">
             <div id="editor-container" class="aspect-box">
-              <!-- Grid Container will be injected here -->
-              <div id="editor-grid"></div>
+              
+              <!-- 1. Preview View (2x2 miniature grids) -->
+              <div id="editor-preview-view">
+                <div class="preview-item" data-slot="0">
+                  <span class="preview-tag">TONE_1 [DARK]</span>
+                  <div class="mini-grid" id="mini-grid-0"></div>
+                </div>
+                <div class="preview-item" data-slot="1">
+                  <span class="preview-tag">TONE_2 [M_DK]</span>
+                  <div class="mini-grid" id="mini-grid-1"></div>
+                </div>
+                <div class="preview-item" data-slot="2">
+                  <span class="preview-tag">TONE_3 [M_LT]</span>
+                  <div class="mini-grid" id="mini-grid-2"></div>
+                </div>
+                <div class="preview-item" data-slot="3">
+                  <span class="preview-tag">TONE_4 [LIGHT]</span>
+                  <div class="mini-grid" id="mini-grid-3"></div>
+                </div>
+              </div>
+
+              <!-- 2. Edit View (Full editor grid, default hidden) -->
+              <div id="editor-edit-view" class="hidden">
+                <div id="editor-grid"></div>
+              </div>
+
             </div>
           </div>
 
-          <div class="editor-controls border-top border-bottom">
+          <div id="editor-controls-panel" class="editor-controls border-top border-bottom hidden">
             <button id="btn-clear" class="btn-tech">CLEAR_GRID</button>
             <button id="btn-invert" class="btn-tech">INVERT_GRID</button>
             <div class="toggle-container">
