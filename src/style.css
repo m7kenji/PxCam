@@ -165,17 +165,24 @@ body {
 
   .app-layout {
     height: auto;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 
   .panel-main {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
     flex: none;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 
   .panel-section {
     min-height: auto;
     height: auto;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 
   .panel-section:first-child {
@@ -188,6 +195,12 @@ body {
     height: auto;
     min-height: 296px; /* 256px + 40px padding */
     padding: 20px;
+    width: 100%;
+    max-width: 100vw;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .panel-footer {

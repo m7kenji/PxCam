@@ -529,7 +529,8 @@ export class App {
       const box = wrapper.querySelector('.aspect-box');
       if (!box) return;
 
-      const availW = wrapper.clientWidth - 40; // Subtract padding
+      // On mobile, use window.innerWidth to avoid parent container expanding from child size
+      const availW = isMobile ? (window.innerWidth - 40) : (wrapper.clientWidth - 40);
       const availH = wrapper.clientHeight - 40;
       
       // On mobile, height is auto-scrolling, so fit strictly to available width
