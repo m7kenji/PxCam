@@ -44,8 +44,9 @@ export class Renderer {
   init() {
     if (!this.canvas) return;
 
-    // Step 1: Initialize WebGL Context
-    this.gl = this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
+    // Step 1: Initialize WebGL Context with preserveDrawingBuffer to support capture/recording
+    const glOptions = { preserveDrawingBuffer: true };
+    this.gl = this.canvas.getContext('webgl', glOptions) || this.canvas.getContext('experimental-webgl', glOptions);
     if (!this.gl) {
       this.app.log('RENDERER_ERROR: WEBGL CONTEXT NOT SUPPORTED.');
       return;

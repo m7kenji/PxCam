@@ -114,6 +114,14 @@ export class App {
     // Frame rate control config
     this.targetFps = 60; // 60 | 30 | 15 | 8
     this.lastFrameTime = 0;
+
+    // Video Recording state
+    this.isRecording = false;
+    this.mediaRecorder = null;
+    this.recordedChunks = [];
+    this.recordingStartTime = 0;
+    this.recordingInterval = null;
+    this.recordingAutoStopTimeout = null;
   }
 
   // Active pattern set getter based on current pattern size
@@ -321,18 +329,18 @@ export class App {
       });
     }
 
-    // Dummy Capture Buttons
+    // Capture Buttons
     const btnCaptureStill = document.getElementById('btn-capture-still');
     if (btnCaptureStill) {
       btnCaptureStill.addEventListener('click', () => {
-        this.log('SYSTEM: STILL CAPTURE TRIGGERED (DUMMY)');
+        this.captureStill();
       });
     }
 
     const btnRecordVideo = document.getElementById('btn-record-video');
     if (btnRecordVideo) {
       btnRecordVideo.addEventListener('click', () => {
-        this.log('SYSTEM: VIDEO RECORDING STARTED (DUMMY)');
+        this.toggleVideoRecord();
       });
     }
 
@@ -646,6 +654,138 @@ export class App {
       if (this.renderer.canvas.width !== size) {
         this.renderer.resize(size);
       }
+    }
+  }
+
+  captureStill() {
+    if (!this.renderer || !this.renderer.canvas) return;
+
+    try {
+      const canvas = this.renderer.canvas;
+      const dataUrl = canvas.toDataURL('image/png');
+
+      const timestamp = new Date().toISOString().replace(/[-:T]/g, '_').slice(0, 19);
+      const filename = `pxcam_${timestamp}.png`;
+
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = dataUrl;
+      link.click();
+
+      this.log(`SYS: STILL CAPTURE COMPLETED: ${filename}`);
+    } catch (err) {
+      this.log(`SYS_ERROR: STILL CAPTURE FAILED: ${err.message}`);
+    }
+  }
+
+  toggleVideoRecord() {
+    if (this.isRecording) {
+      this.stopRecording();
+    } else {
+      this.startRecording();
+    }
+  }
+
+  startRecording() {
+    if (!this.renderer || !this.renderer.canvas) return;
+
+    this.recordedChunks = [];
+
+    // Check supported mime types
+    let options = { mimeType: 'video/webm;codecs=vp9' };
+    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+      options = { mimeType: 'video/webm;codecs=vp8' };
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options = { mimeType: 'video/webm' };
+      }
+    }
+
+    try {
+      // Capture stream from WebGL canvas at targetFps
+      const stream = this.renderer.canvas.captureStream(this.targetFps);
+      
+      this.mediaRecorder = new MediaRecorder(stream, options);
+      
+      this.mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          this.recordedChunks.push(e.data);
+        }
+      };
+
+      this.mediaRecorder.onstop = () => {
+        const blob = new Blob(this.recordedChunks, { type: options.mimeType });
+        const url = URL.createObjectURL(blob);
+        
+        const timestamp = new Date().toISOString().replace(/[-:T]/g, '_').slice(0, 19);
+        const extension = options.mimeType.includes('mp4') ? 'mp4' : 'webm';
+        const filename = `pxcam_${timestamp}.${extension}`;
+        
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = url;
+        link.click();
+        
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+
+        this.log(`SYS: VIDEO RECORDING COMPLETED: ${filename}`);
+      };
+
+      // Start recording
+      this.mediaRecorder.start();
+      this.isRecording = true;
+      this.recordingStartTime = performance.now();
+
+      // Auto-stop after 30 seconds to prevent OOM
+      this.recordingAutoStopTimeout = setTimeout(() => {
+        this.log('SYS: AUTO-STOPPED VIDEO RECORDING (30S LIMIT REACHED)');
+        this.stopRecording();
+      }, 30000);
+      
+      // Update UI button and start timer
+      const btnRecordVideo = document.getElementById('btn-record-video');
+      if (btnRecordVideo) {
+        btnRecordVideo.classList.add('recording');
+        btnRecordVideo.textContent = `[ REC: 00:00 ]`;
+      }
+
+      this.recordingInterval = setInterval(() => {
+        const elapsed = Math.floor((performance.now() - this.recordingStartTime) / 1000);
+        const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
+        const ss = String(elapsed % 60).padStart(2, '0');
+        if (btnRecordVideo) {
+          btnRecordVideo.textContent = `[ REC: ${mm}:${ss} ]`;
+        }
+      }, 1000);
+
+      this.log('SYS: VIDEO RECORDING STARTED');
+    } catch (err) {
+      this.log(`SYS_ERROR: VIDEO RECORDING FAILED: ${err.message}`);
+    }
+  }
+
+  stopRecording() {
+    if (!this.mediaRecorder || this.mediaRecorder.state === 'inactive') return;
+
+    // Clear auto-stop timeout if stopped manually
+    if (this.recordingAutoStopTimeout) {
+      clearTimeout(this.recordingAutoStopTimeout);
+      this.recordingAutoStopTimeout = null;
+    }
+
+    this.mediaRecorder.stop();
+    this.isRecording = false;
+
+    // Clear timer
+    if (this.recordingInterval) {
+      clearInterval(this.recordingInterval);
+      this.recordingInterval = null;
+    }
+
+    // Reset UI button
+    const btnRecordVideo = document.getElementById('btn-record-video');
+    if (btnRecordVideo) {
+      btnRecordVideo.classList.remove('recording');
+      btnRecordVideo.textContent = '[ VID_REC ]';
     }
   }
 }

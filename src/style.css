@@ -361,6 +361,22 @@ body {
   color: var(--bg-color);
 }
 
+.btn-tech.recording {
+  animation: rec-blink 1.5s steps(2, start) infinite;
+  border-color: var(--accent-color);
+}
+
+@keyframes rec-blink {
+  0%, 100% {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+  }
+  50% {
+    background-color: transparent;
+    color: var(--accent-color);
+  }
+}
+
 .toggle-container {
   display: flex;
   align-items: center;
