@@ -227,6 +227,98 @@ body {
     width: 100%;
     justify-content: center;
   }
+
+  /* Responsive Header */
+  .panel-header {
+    height: auto;
+    padding: 8px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .header-left {
+    gap: 8px;
+  }
+
+  .tech-title {
+    font-size: 0.95rem;
+  }
+
+  .header-right {
+    width: 100%;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    gap: 8px;
+  }
+
+  .model-number, .version-label {
+    padding: 1px 6px;
+  }
+
+  /* Sliders & Controls Layout on Mobile */
+  .source-controls, .render-controls {
+    gap: 8px 8px;
+  }
+
+  .control-group {
+    font-size: 0.7rem;
+    min-width: 0;
+  }
+
+  .control-group label {
+    width: 55px;
+    flex-shrink: 0;
+  }
+
+  .control-group input[type="range"] {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .slider-val {
+    width: 28px;
+    flex-shrink: 0;
+  }
+
+  /* Palette & Custom Color pickers adjustment to prevent overflow */
+  .palette-container, .custom-colors-container {
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .palette-label {
+    font-size: 0.75rem;
+  }
+
+  .custom-color-pickers-wrapper {
+    gap: 8px;
+  }
+
+  .palette-list {
+    gap: 4px;
+  }
+
+  .color-picker-input, .palette-color {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Editor controls adjustment to fit 3 buttons in 1 row */
+  .editor-controls {
+    padding: 0 10px;
+    gap: 6px;
+  }
+
+  .editor-controls .btn-tech {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+
+  .editor-controls .toggle-container {
+    font-size: 0.75rem;
+    gap: 4px;
+  }
 }
 
 /* Panel Sections */
