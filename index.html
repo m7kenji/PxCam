@@ -15,14 +15,13 @@
     <!-- Technical & Monospace Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Roboto+Mono:wght@300;400;700&family=Tiny5&display=swap" rel="stylesheet">
   </head>
   <body>
     <div id="app" class="app-layout">
       <!-- Top Technical Header -->
       <header class="panel-header border-bottom">
         <div class="header-left">
-          <span class="status-indicator live-pulse"></span>
           <h1 class="tech-title">PX-FILTER // DEVICE: CAM_SYS_01</h1>
         </div>
         <div class="header-right">
@@ -57,9 +56,14 @@
           </div>
 
           <div class="section-footer border-top">
+            <div class="capture-controls border-bottom" id="capture-controls">
+              <button id="btn-capture-still" class="btn-tech">[ STILL_CAP ]</button>
+              <button id="btn-record-video" class="btn-tech">[ VID_REC ]</button>
+            </div>
+
             <div class="tech-data">
               <div>RES: <span id="val-res">480x480</span>px</div>
-              <div>RATE: <span id="val-fps">--</span>fps</div>
+              <div id="rate-toggle-trigger" class="clickable-text">RATE: <span id="val-fps">--</span>/<span id="val-target-fps">60</span>fps</div>
               <div>MODE: QUAD_TREE_DITHER</div>
             </div>
             
@@ -93,7 +97,7 @@
         <section class="panel-section" id="editor-section">
           <div class="section-header border-bottom">
             <span class="section-tag">[ 02 / MASK_DESIGNER ]</span>
-            <span class="metadata-feed">GRID: <span id="grid-size-label">8x8</span></span>
+            <span class="metadata-feed clickable" id="header-grid-size-toggle">GRID: <span id="grid-size-label">8x8</span></span>
           </div>
 
           <!-- Edit View Header (Located outside the aspect box to prevent canvas distortion) -->

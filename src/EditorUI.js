@@ -58,9 +58,16 @@ export class EditorUI {
     if (this.controlsPanel) this.controlsPanel.classList.remove('hidden');
     if (this.editHeader) this.editHeader.classList.remove('hidden');
 
+    // Add editing mode class to root for responsive flex layout transition
+    const appEl = document.getElementById('app');
+    if (appEl) appEl.classList.add('mode-editing');
+
     // Re-initialize editor grid and populate it with selected slot's pattern data
     this.initGrid();
     this.updateGridFromState();
+
+    // Trigger snapping layout update instantly to accommodate size transition
+    this.app.handleResize();
 
     this.app.log(`EDITOR: ENTERED EDIT MODE FOR TONE_${slot + 1}`);
   }
@@ -74,8 +81,15 @@ export class EditorUI {
     if (this.controlsPanel) this.controlsPanel.classList.add('hidden');
     if (this.editHeader) this.editHeader.classList.add('hidden');
 
+    // Remove editing mode class from root
+    const appEl = document.getElementById('app');
+    if (appEl) appEl.classList.remove('mode-editing');
+
     // Sync mini grids with the newly edited state
     this.updateMiniGrids();
+
+    // Trigger snapping layout update
+    this.app.handleResize();
 
     this.app.log(`EDITOR: EXITED EDIT MODE`);
   }

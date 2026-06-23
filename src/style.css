@@ -1,8 +1,8 @@
 /* CSS Variables & Theme Definitions */
 :root {
   /* Common variables */
-  --font-tech: 'Share Tech Mono', 'Roboto Mono', monospace;
-  --font-text: 'Roboto Mono', monospace;
+  --font-tech: 'Tiny5', 'Share Tech Mono', 'Roboto Mono', monospace;
+  --font-text: 'Tiny5', 'Roboto Mono', monospace;
   --transition-speed: 0.2s;
 
   /* Theme: Dark (Cyber-Industrial) - Default (Monotone Config) */
@@ -156,171 +156,6 @@ body {
   min-height: 0; /* Important to prevent overflow */
 }
 
-@media (max-width: 768px) {
-  body {
-    height: auto;
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
-
-  .app-layout {
-    height: auto;
-    max-width: 100vw;
-    overflow-x: hidden;
-  }
-
-  .panel-main {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-    flex: none;
-    max-width: 100vw;
-    overflow-x: hidden;
-  }
-
-  .panel-section {
-    min-height: auto;
-    height: auto;
-    width: 100%;
-    max-width: 100vw;
-    overflow-x: hidden;
-  }
-
-  .panel-section:first-child {
-    border-right: none;
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .visual-wrapper {
-    flex: none;
-    height: auto;
-    min-height: 296px; /* 256px + 40px padding */
-    padding: 20px;
-    width: 100%;
-    max-width: 100vw;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .panel-footer {
-    height: auto;
-    min-height: 70px;
-    flex-direction: column;
-    padding: 20px;
-    gap: 15px;
-  }
-
-  .footer-left {
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-    width: 100%;
-  }
-
-  .system-logs {
-    max-width: 100%;
-    width: 100%;
-  }
-
-  .footer-right {
-    width: 100%;
-    justify-content: center;
-  }
-
-  /* Responsive Header */
-  .panel-header {
-    height: auto;
-    padding: 8px 16px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-
-  .header-left {
-    gap: 8px;
-  }
-
-  .tech-title {
-    font-size: 0.95rem;
-  }
-
-  .header-right {
-    width: 100%;
-    justify-content: space-between;
-    font-size: 0.7rem;
-    gap: 8px;
-  }
-
-  .model-number, .version-label {
-    padding: 1px 6px;
-  }
-
-  /* Sliders & Controls Layout on Mobile */
-  .source-controls, .render-controls {
-    gap: 8px 8px;
-  }
-
-  .control-group {
-    font-size: 0.7rem;
-    min-width: 0;
-  }
-
-  .control-group label {
-    width: 55px;
-    flex-shrink: 0;
-  }
-
-  .control-group input[type="range"] {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .slider-val {
-    width: 28px;
-    flex-shrink: 0;
-  }
-
-  /* Palette & Custom Color pickers adjustment to prevent overflow */
-  .palette-container, .custom-colors-container {
-    gap: 8px;
-    padding: 8px 10px;
-  }
-
-  .palette-label {
-    font-size: 0.75rem;
-  }
-
-  .custom-color-pickers-wrapper {
-    gap: 8px;
-  }
-
-  .palette-list {
-    gap: 4px;
-  }
-
-  .color-picker-input, .palette-color {
-    width: 16px;
-    height: 16px;
-  }
-
-  /* Editor controls adjustment to fit 3 buttons in 1 row */
-  .editor-controls {
-    padding: 0 10px;
-    gap: 6px;
-  }
-
-  .editor-controls .btn-tech {
-    padding: 4px 8px;
-    font-size: 0.75rem;
-  }
-
-  .editor-controls .toggle-container {
-    font-size: 0.75rem;
-    gap: 4px;
-  }
-}
-
 /* Panel Sections */
 .panel-section {
   display: flex;
@@ -347,6 +182,18 @@ body {
 
 .metadata-feed {
   color: var(--text-muted);
+}
+.metadata-feed.clickable {
+  cursor: pointer;
+}
+.metadata-feed.clickable:hover {
+  color: var(--text-color);
+}
+.clickable-text {
+  cursor: pointer;
+}
+.clickable-text:hover {
+  color: var(--accent-color);
 }
 
 /* Visual Wrapper & 1:1 Aspect ratio handling */
@@ -434,7 +281,6 @@ body {
   background-color: var(--cell-off-color);
   aspect-ratio: 1 / 1;
   cursor: crosshair;
-  transition: background-color 0.05s ease;
   image-rendering: pixelated;
 }
 
@@ -461,7 +307,6 @@ body {
   font-size: 0.75rem;
   cursor: pointer;
   outline: none;
-  transition: all var(--transition-speed) ease;
   text-align: center;
 }
 
@@ -504,7 +349,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color var(--transition-speed) ease;
 }
 
 .btn-tech:hover {
@@ -549,7 +393,7 @@ body {
   width: 18px;
   height: 18px;
   border: 1px solid var(--border-color);
-  border-radius: 2px;
+  border-radius: 0;
   cursor: pointer;
 }
 
@@ -662,6 +506,20 @@ body {
   width: 100%;
 }
 
+.capture-controls {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.capture-controls .btn-tech {
+  flex: 1;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
 .select-tech {
   flex: 1;
   background-color: var(--bg-panel);
@@ -769,12 +627,35 @@ body {
 }
 
 .control-group input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
   flex: 1;
-  height: 4px;
-  accent-color: var(--accent-color);
+  height: 1px;
   outline: none;
   background-color: var(--border-color);
-  border-radius: 2px;
+  border-radius: 0;
+}
+
+/* Chrome, Safari, Opera, Edge */
+.control-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 8px;
+  height: 14px;
+  background-color: var(--bg-color);
+  border: 1px solid var(--accent-color);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+/* Firefox */
+.control-group input[type="range"]::-moz-range-thumb {
+  width: 8px;
+  height: 14px;
+  background-color: var(--bg-color);
+  border: 1px solid var(--accent-color);
+  border-radius: 0;
+  cursor: pointer;
 }
 
 .slider-val {
@@ -864,7 +745,6 @@ input:focus + .switch-slider {
   border: 1px solid var(--border-color);
   padding: 6px;
   cursor: pointer;
-  transition: border-color var(--transition-speed), background-color var(--transition-speed);
   min-height: 0;
   overflow: hidden;
 }
@@ -896,8 +776,6 @@ input:focus + .switch-slider {
 }
 
 .mini-grid-cell {
-  aspect-ratio: 1 / 1;
-  transition: background-color 0.05s ease;
 }
 
 #editor-edit-view {
@@ -918,4 +796,242 @@ input:focus + .switch-slider {
 #editor-edit-view #editor-grid {
   width: 100%;
   height: 100%;
+}
+
+@media (max-width: 768px) {
+  body {
+    height: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .app-layout {
+    height: auto;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .panel-main {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    flex: none;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  /* No dynamic flex ratios on containers, sizing controlled by JS on inner aspect box */
+  #camera-section, #editor-section {
+    flex: none;
+    height: auto;
+  }
+
+  .panel-section {
+    min-height: auto;
+    height: auto;
+    width: 100%;
+    max-width: 100vw;
+    overflow: hidden;
+  }
+
+  .panel-section:first-child {
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .visual-wrapper {
+    flex: none;
+    height: auto;
+    padding: 10px 3px;
+    width: 100%;
+    max-width: 100vw;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+
+  .panel-footer {
+    height: auto;
+    min-height: 70px;
+    padding: 20px;
+    gap: 15px;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer-left {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+  }
+
+  .barcode-container {
+    display: flex; /* Keep barcode */
+    opacity: var(--barcode-opacity);
+  }
+
+  .system-logs {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .log-feed {
+    height: 35px;
+    padding: 4px 8px;
+  }
+
+  .footer-right {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Responsive Header */
+  .panel-header {
+    height: auto;
+    min-height: 50px;
+    padding: 8px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .header-left {
+    gap: 8px;
+  }
+
+  .tech-title {
+    font-size: 0.95rem;
+  }
+
+  .header-right {
+    width: 100%;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    gap: 8px;
+  }
+
+  .model-number, .version-label {
+    padding: 1px 6px;
+  }
+
+  /* Sliders & Controls Layout on Mobile */
+  .source-controls, .render-controls {
+    gap: 8px 8px;
+  }
+
+  .control-group {
+    font-size: 0.7rem;
+    min-width: 0;
+  }
+
+  .control-group label {
+    width: 55px;
+    flex-shrink: 0;
+  }
+
+  .control-group input[type="range"] {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .slider-val {
+    width: 28px;
+    flex-shrink: 0;
+  }
+
+  .section-footer {
+    padding: 10px 15px;
+    gap: 8px;
+    min-height: auto;
+  }
+
+  /* Compact capture controls on mobile */
+  .capture-controls {
+    gap: 10px;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+  }
+
+  .capture-controls .btn-tech {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+
+  /* Palette & Custom Color pickers adjustment to prevent overflow */
+  .palette-container, .custom-colors-container {
+    gap: 8px;
+    padding: 4px 15px;
+  }
+
+  .palette-label {
+    font-size: 0.75rem;
+  }
+
+  .custom-color-pickers-wrapper {
+    gap: 8px;
+  }
+
+  .palette-list {
+    gap: 4px;
+  }
+
+  .color-picker-input, .palette-color {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Editor controls adjustment to fit 3 buttons in 1 row */
+  .editor-controls {
+    padding: 0 10px;
+    height: 40px;
+    gap: 6px;
+  }
+
+  .editor-controls .btn-tech {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+
+  .editor-controls .toggle-container {
+    font-size: 0.75rem;
+    gap: 4px;
+  }
+
+  /* 4x1 Preview layout definition for mobile - enforce square aspect ratio */
+  #editor-preview-view {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: 1fr;
+    gap: 10px;
+    padding: 10px 0;
+    height: auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .preview-item {
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 6px;
+    box-sizing: border-box;
+    min-height: 0;
+  }
+
+  .preview-tag {
+    font-size: 0.55rem;
+    margin-bottom: 4px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .mini-grid {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    flex: 1; /* Stretch naturally while maintaining square aspect-ratio */
+  }
 }

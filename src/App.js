@@ -110,6 +110,10 @@ export class App {
     this.cameraController = null;
     this.editorUI = null;
     this.renderer = null;
+
+    // Frame rate control config
+    this.targetFps = 60; // 60 | 30 | 15 | 8
+    this.lastFrameTime = 0;
   }
 
   // Active pattern set getter based on current pattern size
@@ -174,6 +178,15 @@ export class App {
     const btnToggleGridSize = document.getElementById('btn-toggle-grid-size');
     if (btnToggleGridSize) {
       btnToggleGridSize.addEventListener('click', () => {
+        const nextSize = this.patternSize === 8 ? 16 : 8;
+        this.setGridSize(nextSize);
+      });
+    }
+
+    // Header Grid Size Toggle (metadata-feed in normal view)
+    const headerGridToggle = document.getElementById('header-grid-size-toggle');
+    if (headerGridToggle) {
+      headerGridToggle.addEventListener('click', () => {
         const nextSize = this.patternSize === 8 ? 16 : 8;
         this.setGridSize(nextSize);
       });
@@ -307,6 +320,41 @@ export class App {
         this.generateRandomHarmonizedPalette();
       });
     }
+
+    // Dummy Capture Buttons
+    const btnCaptureStill = document.getElementById('btn-capture-still');
+    if (btnCaptureStill) {
+      btnCaptureStill.addEventListener('click', () => {
+        this.log('SYSTEM: STILL CAPTURE TRIGGERED (DUMMY)');
+      });
+    }
+
+    const btnRecordVideo = document.getElementById('btn-record-video');
+    if (btnRecordVideo) {
+      btnRecordVideo.addEventListener('click', () => {
+        this.log('SYSTEM: VIDEO RECORDING STARTED (DUMMY)');
+      });
+    }
+
+    // FPS Limit Toggle (under tech-data)
+    const rateToggle = document.getElementById('rate-toggle-trigger');
+    if (rateToggle) {
+      rateToggle.addEventListener('click', () => {
+        const current = this.targetFps;
+        let next = 60;
+        if (current === 60) next = 30;
+        else if (current === 30) next = 15;
+        else if (current === 15) next = 8;
+        else next = 60;
+        
+        this.targetFps = next;
+        const targetFpsSpan = document.getElementById('val-target-fps');
+        if (targetFpsSpan) {
+          targetFpsSpan.textContent = next;
+        }
+        this.log(`SYS: TARGET FRAME RATE LIMIT SET TO ${next} FPS`);
+      });
+    }
   }
 
   setupPaletteUI() {
@@ -317,7 +365,7 @@ export class App {
     this.palettes.forEach((palette, idx) => {
       const item = document.createElement('div');
       item.className = `palette-color ${idx === this.activePaletteIndex ? 'active' : ''}`;
-      item.style.background = `linear-gradient(135deg, ${palette.colors[2]} 0%, ${palette.colors[3]} 100%)`;
+      item.style.backgroundColor = palette.colors[2];
       item.title = palette.name;
       
       item.addEventListener('click', () => {
@@ -509,12 +557,23 @@ export class App {
     logFeed.scrollTop = logFeed.scrollHeight;
   }
 
-  // Loop manager to request frames
+  // Loop manager to request frames with target frame rate limiting
   startLoop() {
-    const tick = () => {
-      if (this.cameraController && this.renderer) {
-        const videoElement = this.cameraController.getVideoElement();
-        this.renderer.render(videoElement);
+    const tick = (timestamp) => {
+      if (!this.lastFrameTime) {
+        this.lastFrameTime = timestamp;
+      }
+      const elapsed = timestamp - this.lastFrameTime;
+      const interval = 1000 / this.targetFps;
+
+      // Allow 2ms tolerance to smooth out requestAnimationFrame variations
+      if (elapsed >= interval - 2) {
+        if (this.cameraController && this.renderer) {
+          const videoElement = this.cameraController.getVideoElement();
+          this.renderer.render(videoElement);
+        }
+        // Adjust lastFrameTime keeping the drift correction
+        this.lastFrameTime = timestamp - (elapsed % interval);
       }
       requestAnimationFrame(tick);
     };
@@ -525,27 +584,59 @@ export class App {
   handleResize() {
     const isMobile = window.innerWidth <= 768;
     const wrappers = document.querySelectorAll('.visual-wrapper');
+    const isEditing = document.getElementById('app')?.classList.contains('mode-editing');
+
     wrappers.forEach((wrapper) => {
       const box = wrapper.querySelector('.aspect-box');
       if (!box) return;
 
+      const isCamera = wrapper.closest('#camera-section') !== null;
+
+      // On mobile, release 1:1 aspect ratio constraint for tone previews in normal mode to span 100% width
+      if (isMobile && !isCamera && !isEditing) {
+        box.style.width = '100%';
+        box.style.height = 'auto';
+        box.style.aspectRatio = 'auto';
+        return;
+      }
+
       // On mobile, use window.innerWidth to avoid parent container expanding from child size
-      const availW = isMobile ? (window.innerWidth - 40) : (wrapper.clientWidth - 40);
-      const availH = wrapper.clientHeight - 40;
+      const availW = isMobile ? (window.innerWidth - 6) : (wrapper.clientWidth - 40);
+      let maxFit = availW;
+
+      if (isMobile) {
+        if (isEditing) {
+          if (isCamera) {
+            // Shrink camera snapshot in editing mode to save screen height
+            maxFit = 128;
+          } else {
+            // Editor grid size in editing mode
+            maxFit = Math.min(availW, 256);
+          }
+        } else {
+          // Allow larger camera sizes up to 384px in normal mode on mobile
+          maxFit = Math.min(availW, 384);
+        }
+      } else {
+        const availH = wrapper.clientHeight - 40;
+        maxFit = Math.min(availW, availH);
+      }
       
-      // On mobile, height is auto-scrolling, so fit strictly to available width
-      const maxFit = isMobile ? availW : Math.min(availW, availH);
-      
-      // Snap to the largest power of two that fits (256, 512, 1024) to ensure pixel-perfect scaling
-      let snappedSize = 256;
+      // Snap to the largest power of two (or 384px multiplier) that fits to ensure pixel-perfect scaling
+      let snappedSize = 128;
       if (maxFit >= 1024) {
         snappedSize = 1024;
       } else if (maxFit >= 512) {
         snappedSize = 512;
+      } else if (maxFit >= 384) {
+        snappedSize = 384;
+      } else if (maxFit >= 256) {
+        snappedSize = 256;
       }
       
       box.style.width = `${snappedSize}px`;
       box.style.height = `${snappedSize}px`;
+      box.style.aspectRatio = '';
     });
 
     // Notify Renderer of new canvas resolution to update target buffer
