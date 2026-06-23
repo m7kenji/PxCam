@@ -66,7 +66,36 @@
 
 ---
 
-## 6. 将来 of 拡張候補
-* **WebGLベースの四分木演算**: 現在CPUで行っている四分木分割計算（`computeVariableGrid`）を, GPUのCompute Shaderやテクスチャ解析に移植し、さらに高速化する。
-* **カスタムパレットのUI実装**: 現在プレースホルダーであるパレットリストに、RGBスライダー等からカスタムパレットを追加・編集できる機能を追加する。
-* **パターンの保存・読み込み**: デザインしたパターンのJSON/画像エクスポート、ローカルストレージ保存。
+## 6. 将来の拡張候補:
+  * **WebGLベースの四分木演算**: 現在CPUで行っている四分木分割計算（`computeVariableGrid`）を、GPUのCompute Shaderやテクスチャ解析に移植し、さらに高速化する。
+  * **カスタムパレットのUI実装**: 現在プレースホルダーであるパレットリストに、RGBスライダー等からカスタムパレットを追加・編集できる機能を追加する。
+  * **パターンの保存・読み込み**: デザインしたパターンのJSON/画像エクスポート、ローカルストレージ保存。
+
+---
+
+## 7. 実機動作確認 & GitHub Pages デプロイ
+
+実機（スマートフォン等）での動作確認や、本番環境への自動公開を行うための設計ルールです。
+
+### 7.1. GitHub Pages 自動デプロイ設定
+* **ビルド設定の基本パス**:
+  * GitHub Pages（サブフォルダ公開）でCSSやJSを正常に読み込ませるため、[vite.config.js](file:///Users/kenjikishi/projects/PxCam/vite.config.js) の `base` パスには必ず `/PxCam/` を設定する。
+* **自動デプロイ（GitHub Actions）**:
+  * コードが `main` ブランチにプッシュされると、[.github/workflows/deploy.yml](file:///Users/kenjikishi/projects/PxCam/.github/workflows/deploy.yml) に基づき自動的にビルドとデプロイが行われる。
+  * デプロイを有効にするため、GitHubリポジトリの設定（`Settings -> Pages -> Build and deployment -> Source`）で、**「GitHub Actions」** を選択しておく必要がある。
+
+### 7.2. モバイル向けレスポンシブ設計とレイアウト無限ループ防止
+* **スクロール制限の解除**:
+  * モバイル環境（`max-width: 768px`）では、1画面固定（`100dvh` / `overflow: hidden`）を解除し、`body` および `.app-layout` を `height: auto` に変更して縦スクロールを許可する。
+* **サイズ計算の無限拡大バグ防止**:
+  * `App.handleResize()` では、モバイル時に親要素（`.visual-wrapper`）の幅ではなく、常に **`window.innerWidth`（実際の画面幅）からパディング（40px）を引いた値** を基準にスナップサイズを計算する。
+  * 親要素の幅を基準にしてしまうと、「アスペクトボックスの拡大 ➡️ 親要素の拡大 ➡️ JSがさらにアスペクトボックスを大きくスナップする」という無限拡大ループに陥り、表示がはみ出るバグが発生するため厳禁とする。
+
+### 7.3. スマホ全画面（PWA）表示とキャッシュ対策
+* **ステータスバー非表示の没入モード（PWA化）**:
+  * AndroidやiOSでステータスバー（時計や電池）を非表示にして全画面（fullscreen）で起動させるため、[public/manifest.json](file:///Users/kenjikishi/projects/PxCam/public/manifest.json) を定義し、`"display": "fullscreen"` および `"orientation": "portrait"` を設定する。
+  * `index.html` に `<meta name="theme-color" content="#0d0d0d">` を設定し、背景色と同化させる。
+* **マニフェストのキャッシュ対策（重要）**:
+  * スマートフォンのブラウザ（特に Chrome）は `manifest.json` を強くキャッシュするため、設定を変更しても古い状態で起動しやすい。
+  * 対策として、`index.html` での読み込み部分に `<link rel="manifest" href="./manifest.json?v=2">` のように**クエリパラメータ（バージョン情報）を付与してキャッシュを破棄（キャッシュバスト）**する。
+  * 実機で変更が反映されない場合は、スマホホーム画面から古いアイコンを一旦削除し、Chromeの「サイトの設定」から「クッキーとサイトデータ」を削除してリセットした後、再度「ホーム画面に追加」を行う手順をとる。
