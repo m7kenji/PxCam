@@ -189,6 +189,11 @@ body {
 .metadata-feed.clickable:hover {
   color: var(--text-color);
 }
+.header-metadata-group {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
 .clickable-text {
   cursor: pointer;
 }

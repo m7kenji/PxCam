@@ -10,78 +10,1059 @@ export class App {
     this.brightness = 1.0;
     this.contrast = 1.0;
     
-    // Default patterns (8x8) from darkest to lightest tones
-    this.patterns8 = [
-      // Tone 0 (Darkest - dense grid)
-      [
-        1,1,1,1,1,1,1,1,
-        1,1,0,0,0,0,1,1,
-        1,0,1,0,0,1,0,1,
-        1,0,0,1,1,0,0,1,
-        1,0,0,1,1,0,0,1,
-        1,0,1,0,0,1,0,1,
-        1,1,0,0,0,0,1,1,
-        1,1,1,1,1,1,1,1
-      ],
-      // Tone 1 (Mid-Dark - retro diamond/box)
-      [
-        0,0,1,1,1,1,0,0,
-        0,1,0,0,0,0,1,0,
-        1,0,1,0,0,1,0,1,
-        1,0,0,0,0,0,0,1,
-        1,0,0,0,0,0,0,1,
-        1,0,1,0,0,1,0,1,
-        0,1,0,0,0,0,1,0,
-        0,0,1,1,1,1,0,0
-      ],
-      // Tone 2 (Mid-Light - diagonal checkerboard)
-      [
-        1,0,1,0,1,0,1,0,
-        0,1,0,1,0,1,0,1,
-        1,0,1,0,1,0,1,0,
-        0,1,0,1,0,1,0,1,
-        1,0,1,0,1,0,1,0,
-        0,1,0,1,0,1,0,1,
-        1,0,1,0,1,0,1,0,
-        0,1,0,1,0,1,0,1
-      ],
-      // Tone 3 (Lightest - sparse dot/outer ring)
-      [
-        0,0,0,0,0,0,0,0,
-        0,0,0,1,1,0,0,0,
-        0,0,1,0,0,1,0,0,
-        0,1,0,0,0,0,1,0,
-        0,1,0,0,0,0,1,0,
-        0,0,1,0,0,1,0,0,
-        0,0,0,1,1,0,0,0,
-        0,0,0,0,0,0,0,0
-      ]
-    ];
-
-    // Default patterns (16x16) generated procedurally
-    this.patterns16 = [
-      // Slot 0 (Dense rings)
-      Array(256).fill(0).map((_, i) => {
-        const x = i % 16; const y = Math.floor(i / 16);
-        const d = Math.sqrt((x - 7.5)**2 + (y - 7.5)**2);
-        return (d < 7.5 && d > 5.5) || (d < 4.5 && d > 2.5) || (d < 1) ? 1 : 0;
-      }),
-      // Slot 1 (Circle outline)
-      Array(256).fill(0).map((_, i) => {
-        const x = i % 16; const y = Math.floor(i / 16);
-        const d = Math.sqrt((x - 7.5)**2 + (y - 7.5)**2);
-        return (d < 6.5 && d > 4.5) ? 1 : 0;
-      }),
-      // Slot 2 (Cross hatch grid lines)
-      Array(256).fill(0).map((_, i) => {
-        const x = i % 16; const y = Math.floor(i / 16);
-        return (x + y) % 4 === 0 || (x - y) % 4 === 0 ? 1 : 0;
-      }),
-      // Slot 3 (Center targets)
-      Array(256).fill(0).map((_, i) => {
-        const x = i % 16; const y = Math.floor(i / 16);
-        return (x === 8 || y === 8) && (x > 3 && x < 13 && y > 3 && y < 13) ? 1 : 0;
-      })
+    this.activePresetIndex = 0; // 0 to 4
+    this.presets = [
+      {
+        name: 'DEFAULT',
+        patterns8: [
+          // Tone 0 (Darkest - dense grid)
+          [
+            1,1,1,1,1,1,1,1,
+            1,1,0,0,0,0,1,1,
+            1,0,1,0,0,1,0,1,
+            1,0,0,1,1,0,0,1,
+            1,0,0,1,1,0,0,1,
+            1,0,1,0,0,1,0,1,
+            1,1,0,0,0,0,1,1,
+            1,1,1,1,1,1,1,1
+          ],
+          // Tone 1 (Mid-Dark - retro diamond/box)
+          [
+            0,0,1,1,1,1,0,0,
+            0,1,0,0,0,0,1,0,
+            1,0,1,0,0,1,0,1,
+            1,0,0,0,0,0,0,1,
+            1,0,0,0,0,0,0,1,
+            1,0,1,0,0,1,0,1,
+            0,1,0,0,0,0,1,0,
+            0,0,1,1,1,1,0,0
+          ],
+          // Tone 2 (Mid-Light - diagonal checkerboard)
+          [
+            1,0,1,0,1,0,1,0,
+            0,1,0,1,0,1,0,1,
+            1,0,1,0,1,0,1,0,
+            0,1,0,1,0,1,0,1,
+            1,0,1,0,1,0,1,0,
+            0,1,0,1,0,1,0,1,
+            1,0,1,0,1,0,1,0,
+            0,1,0,1,0,1,0,1
+          ],
+          // Tone 3 (Lightest - sparse dot/outer ring)
+          [
+            0,0,0,0,0,0,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,1,0,0,1,0,0,
+            0,1,0,0,0,0,1,0,
+            0,1,0,0,0,0,1,0,
+            0,0,1,0,0,1,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,0,0,0,0,0,0
+          ]
+        ],
+        patterns16: [
+          // Slot 0 (Dense rings)
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const d = Math.sqrt((x - 7.5)**2 + (y - 7.5)**2);
+            return (d < 7.5 && d > 5.5) || (d < 4.5 && d > 2.5) || (d < 1) ? 1 : 0;
+          }),
+          // Slot 1 (Circle outline)
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const d = Math.sqrt((x - 7.5)**2 + (y - 7.5)**2);
+            return (d < 6.5 && d > 4.5) ? 1 : 0;
+          }),
+          // Slot 2 (Cross hatch grid lines)
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            return (x + y) % 4 === 0 || (x - y) % 4 === 0 ? 1 : 0;
+          }),
+          // Slot 3 (Center targets)
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            return (x === 8 || y === 8) && (x > 3 && x < 13 && y > 3 && y < 13) ? 1 : 0;
+          })
+        ]
+      },
+      {
+        name: 'GRID_LINE',
+        patterns8: [
+          // Tone 0: 2x2 grid check
+          [
+            1,1,0,0,1,1,0,0,
+            1,1,0,0,1,1,0,0,
+            0,0,1,1,0,0,1,1,
+            0,0,1,1,0,0,1,1,
+            1,1,0,0,1,1,0,0,
+            1,1,0,0,1,1,0,0,
+            0,0,1,1,0,0,1,1,
+            0,0,1,1,0,0,1,1
+          ],
+          // Tone 1: Vertical stripes
+          [
+            1,0,1,0,1,0,1,0,
+            1,0,1,0,1,0,1,0,
+            1,0,1,0,1,0,1,0,
+            1,0,1,0,1,0,1,0,
+            1,0,1,0,1,0,1,0,
+            1,0,1,0,1,0,1,0,
+            1,0,1,0,1,0,1,0,
+            1,0,1,0,1,0,1,0
+          ],
+          // Tone 2: Horizontal stripes
+          [
+            1,1,1,1,1,1,1,1,
+            0,0,0,0,0,0,0,0,
+            1,1,1,1,1,1,1,1,
+            0,0,0,0,0,0,0,0,
+            1,1,1,1,1,1,1,1,
+            0,0,0,0,0,0,0,0,
+            1,1,1,1,1,1,1,1,
+            0,0,0,0,0,0,0,0
+          ],
+          // Tone 3: Diagonal stripes
+          [
+            1,0,0,0,1,0,0,0,
+            0,1,0,0,0,1,0,0,
+            0,0,1,0,0,0,1,0,
+            0,0,0,1,0,0,0,1,
+            1,0,0,0,1,0,0,0,
+            0,1,0,0,0,1,0,0,
+            0,0,1,0,0,0,1,0,
+            0,0,0,1,0,0,0,1
+          ]
+        ],
+        patterns16: [
+          // Slot 0: Grid lines
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            return (x % 4 === 0 || y % 4 === 0) ? 1 : 0;
+          }),
+          // Slot 1: Bold vertical stripes
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16;
+            return (x % 4 < 2) ? 1 : 0;
+          }),
+          // Slot 2: Diagonal grid lines
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            return (x + y) % 8 === 0 || (x - y) % 8 === 0 ? 1 : 0;
+          }),
+          // Slot 3: Thick diagonal stripes
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            return ((x + y) % 8 < 3) ? 1 : 0;
+          })
+        ]
+      },
+      {
+        name: 'HALFTONE',
+        patterns8: [
+          // Tone 0: Large dot
+          [
+            0,0,0,0,0,0,0,0,
+            0,1,1,1,1,1,1,0,
+            0,1,1,1,1,1,1,0,
+            0,1,1,1,1,1,1,0,
+            0,1,1,1,1,1,1,0,
+            0,1,1,1,1,1,1,0,
+            0,1,1,1,1,1,1,0,
+            0,0,0,0,0,0,0,0
+          ],
+          // Tone 1: Medium dot
+          [
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,1,1,1,1,0,0,
+            0,0,1,1,1,1,0,0,
+            0,0,1,1,1,1,0,0,
+            0,0,1,1,1,1,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0
+          ],
+          // Tone 2: Small dot
+          [
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0
+          ],
+          // Tone 3: Scattered dot
+          [
+            1,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,1,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,1,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,1,
+            0,0,0,0,0,0,0,0
+          ]
+        ],
+        patterns16: [
+          // Slot 0: Large halftone
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const d = Math.sqrt((x - 7.5)**2 + (y - 7.5)**2);
+            return (d < 6) ? 1 : 0;
+          }),
+          // Slot 1: Medium halftone
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const d = Math.sqrt((x - 7.5)**2 + (y - 7.5)**2);
+            return (d < 4) ? 1 : 0;
+          }),
+          // Slot 2: Small halftone
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const d = Math.sqrt((x - 7.5)**2 + (y - 7.5)**2);
+            return (d < 2.5) ? 1 : 0;
+          }),
+          // Slot 3: Tiny halftone
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const d = Math.sqrt((x - 7.5)**2 + (y - 7.5)**2);
+            return (d < 1.2) ? 1 : 0;
+          })
+        ]
+      },
+      {
+        name: 'WAVE_NOISE',
+        patterns8: [
+          // Tone 0: Zigzag wave
+          [
+            1,0,0,0,0,0,0,1,
+            0,1,0,0,0,0,1,0,
+            0,0,1,0,0,1,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,1,0,0,1,0,0,
+            0,1,0,0,0,0,1,0,
+            1,0,0,0,0,0,0,1
+          ],
+          // Tone 1: Checkerboard 8x8
+          [
+            1,0,1,0,1,0,1,0,
+            0,1,0,1,0,1,0,1,
+            1,0,1,0,1,0,1,0,
+            0,1,0,1,0,1,0,1,
+            1,0,1,0,1,0,1,0,
+            0,1,0,1,0,1,0,1,
+            1,0,1,0,1,0,1,0,
+            0,1,0,1,0,1,0,1
+          ],
+          // Tone 2: Plus sign (+)
+          [
+            0,0,0,1,1,0,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,0,1,1,0,0,0,
+            1,1,1,1,1,1,1,1,
+            1,1,1,1,1,1,1,1,
+            0,0,0,1,1,0,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,0,1,1,0,0,0
+          ],
+          // Tone 3: Sparse cross (x)
+          [
+            1,0,0,0,0,0,0,1,
+            0,1,0,0,0,0,1,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,1,0,0,0,0,1,0,
+            1,0,0,0,0,0,0,1
+          ]
+        ],
+        patterns16: [
+          // Slot 0: Dense Bayer 4x4
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const bayer = [
+              [ 0,  8,  2, 10],
+              [12,  4, 14,  6],
+              [ 3, 11,  1,  9],
+              [15,  7, 13,  5]
+            ];
+            return bayer[y % 4][x % 4] >= 4 ? 1 : 0;
+          }),
+          // Slot 1: Mid Bayer 4x4
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const bayer = [
+              [ 0,  8,  2, 10],
+              [12,  4, 14,  6],
+              [ 3, 11,  1,  9],
+              [15,  7, 13,  5]
+            ];
+            return bayer[y % 4][x % 4] >= 8 ? 1 : 0;
+          }),
+          // Slot 2: Low Bayer 4x4
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const bayer = [
+              [ 0,  8,  2, 10],
+              [12,  4, 14,  6],
+              [ 3, 11,  1,  9],
+              [15,  7, 13,  5]
+            ];
+            return bayer[y % 4][x % 4] >= 12 ? 1 : 0;
+          }),
+          // Slot 3: Sparse Bayer 4x4
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const bayer = [
+              [ 0,  8,  2, 10],
+              [12,  4, 14,  6],
+              [ 3, 11,  1,  9],
+              [15,  7, 13,  5]
+            ];
+            return bayer[y % 4][x % 4] >= 14 ? 1 : 0;
+          })
+        ]
+      },
+      {
+        name: 'CYBER_TECH',
+        patterns8: [
+          // Tone 0: Checker blocks
+          [
+            1,1,1,1,0,0,0,0,
+            1,1,1,1,0,0,0,0,
+            1,1,1,1,0,0,0,0,
+            1,1,1,1,0,0,0,0,
+            0,0,0,0,1,1,1,1,
+            0,0,0,0,1,1,1,1,
+            0,0,0,0,1,1,1,1,
+            0,0,0,0,1,1,1,1
+          ],
+          // Tone 1: Corner bracket
+          [
+            1,1,1,1,1,1,1,1,
+            1,0,0,0,0,0,0,1,
+            1,0,0,0,0,0,0,1,
+            1,0,0,0,0,0,0,0,
+            1,0,0,0,0,0,0,0,
+            1,0,0,0,0,0,0,1,
+            1,0,0,0,0,0,0,1,
+            1,1,1,1,1,1,1,1
+          ],
+          // Tone 2: Reticle
+          [
+            0,0,1,1,1,1,0,0,
+            0,0,0,0,0,0,0,0,
+            1,0,0,0,0,0,0,1,
+            1,0,0,0,0,0,0,1,
+            1,0,0,0,0,0,0,1,
+            1,0,0,0,0,0,0,1,
+            0,0,0,0,0,0,0,0,
+            0,0,1,1,1,1,0,0
+          ],
+          // Tone 3: Center & Corners
+          [
+            1,0,0,0,0,0,0,1,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            1,0,0,0,0,0,0,1
+          ]
+        ],
+        patterns16: [
+          // Slot 0: Circuit Board lines
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            return (x === 2 || x === 13 || y === 2 || y === 13 || (x === y && x > 2 && x < 13)) ? 1 : 0;
+          }),
+          // Slot 1: Cyber grid
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            return (x % 8 === 0 || y % 8 === 0 || x === y || x === (15 - y)) ? 1 : 0;
+          }),
+          // Slot 2: Reticle cross & circle
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const d = Math.sqrt((x - 7.5)**2 + (y - 7.5)**2);
+            return (d < 5.5 && d > 4.5) || ((x === 8 || y === 8) && d < 7.5) ? 1 : 0;
+          }),
+          // Slot 3: Corner block marks & center
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const isCorner = (x < 3 && y < 3) || (x > 12 && y < 3) || (x < 3 && y > 12) || (x > 12 && y > 12);
+            const isCenter = (x > 6 && x < 9 && y > 6 && y < 9);
+            return (isCorner || isCenter) ? 1 : 0;
+          })
+        ]
+      },
+      {
+        name: 'VINTAGE_TILES',
+        patterns8: [
+          // Tone 0: brick wall
+          [
+            1,1,1,1,1,1,1,1,
+            1,0,0,0,0,0,0,1,
+            1,1,1,1,1,1,1,1,
+            0,0,0,1,1,0,0,0,
+            1,1,1,1,1,1,1,1,
+            0,0,0,0,0,0,0,1,
+            1,1,1,1,1,1,1,1,
+            1,0,0,0,0,0,0,1
+          ],
+          // Tone 1: coptic cross / square frame check
+          [
+            1,1,1,0,0,1,1,1,
+            1,0,0,0,0,0,0,1,
+            1,0,0,0,0,0,0,1,
+            0,0,0,1,1,0,0,0,
+            0,0,0,1,1,0,0,0,
+            1,0,0,0,0,0,0,1,
+            1,0,0,0,0,0,0,1,
+            1,1,1,0,0,1,1,1
+          ],
+          // Tone 2: diamond cross
+          [
+            0,0,0,1,1,0,0,0,
+            0,0,1,0,0,1,0,0,
+            0,1,0,0,0,0,1,0,
+            1,0,0,0,0,0,0,1,
+            1,0,0,0,0,0,0,1,
+            0,1,0,0,0,0,1,0,
+            0,0,1,0,0,1,0,0,
+            0,0,0,1,1,0,0,0
+          ],
+          // Tone 3: sparse tiny flowers
+          [
+            0,0,0,0,0,0,0,0,
+            0,0,1,0,0,1,0,0,
+            0,1,1,1,1,1,1,0,
+            0,0,1,0,0,1,0,0,
+            0,0,0,0,0,0,0,0,
+            0,1,0,0,0,0,1,0,
+            1,1,1,0,0,1,1,1,
+            0,1,0,0,0,0,1,0
+          ]
+        ],
+        patterns16: [
+          // Slot 0: Arabesque tile
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            return ((x % 8 === 0 || y % 8 === 0) || (x === y && x % 4 === 0) || ((15 - x) === y && x % 4 === 0)) ? 1 : 0;
+          }),
+          // Slot 1: Houndstooth
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const lx = x % 8; const ly = y % 8;
+            return (lx < 4 && ly < 4) || (lx >= 4 && ly >= 4 && lx - 4 < ly) ? 1 : 0;
+          }),
+          // Slot 2: Herringbone
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const lx = x % 8; const ly = y % 8;
+            return (lx === ly || lx === (8 - ly)) ? 1 : 0;
+          }),
+          // Slot 3: Basket weave
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const blockX = Math.floor(x / 4);
+            const blockY = Math.floor(y / 4);
+            return (blockX + blockY) % 2 === 0 ? ((x % 4 === 0) ? 1 : 0) : ((y % 4 === 0) ? 1 : 0);
+          })
+        ]
+      },
+      {
+        name: 'GEOMETRIC_FLOW',
+        patterns8: [
+          // Tone 0: S-curve line
+          [
+            1,1,0,0,0,0,1,1,
+            0,1,1,0,0,1,1,0,
+            0,0,1,1,1,1,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,1,1,1,1,0,0,
+            0,1,1,0,0,1,1,0,
+            1,1,0,0,0,0,1,1
+          ],
+          // Tone 1: Wave horizontal
+          [
+            0,1,1,0,0,1,1,0,
+            1,0,0,1,1,0,0,1,
+            0,0,0,0,0,0,0,0,
+            1,1,0,0,1,1,0,0,
+            0,0,1,1,0,0,1,1,
+            0,0,0,0,0,0,0,0,
+            0,1,1,0,0,1,1,0,
+            1,0,0,1,1,0,0,1
+          ],
+          // Tone 2: concentric ring seg
+          [
+            1,1,1,1,0,0,0,0,
+            1,0,0,0,1,1,0,0,
+            1,0,0,0,0,0,1,0,
+            1,0,0,0,0,0,0,1,
+            0,1,0,0,0,0,0,1,
+            0,0,1,1,0,0,0,1,
+            0,0,0,0,1,1,1,1,
+            0,0,0,0,0,0,0,0
+          ],
+          // Tone 3: sparse dash
+          [
+            1,0,0,0,0,0,0,0,
+            0,1,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,1,0,0,0,
+            0,0,0,0,0,1,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,1,0,0,0,0,0,
+            0,0,0,1,0,0,0,0
+          ]
+        ],
+        patterns16: [
+          // Slot 0: Wave interference
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const w1 = Math.sin(x * 0.5) * 4;
+            const w2 = Math.cos(y * 0.5) * 4;
+            return Math.floor(w1 + w2) % 3 === 0 ? 1 : 0;
+          }),
+          // Slot 1: Topography lines
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const v = Math.sin(x * 0.3) * Math.cos(y * 0.3);
+            return Math.abs(v) < 0.15 ? 1 : 0;
+          }),
+          // Slot 2: Spiral
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16 - 7.5; const y = Math.floor(i / 16) - 7.5;
+            const r = Math.sqrt(x*x + y*y);
+            const theta = Math.atan2(y, x);
+            return Math.sin(r * 0.8 - theta * 2.0) > 0.5 ? 1 : 0;
+          }),
+          // Slot 3: Parallel stripes
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            return (x - y) % 6 === 0 ? 1 : 0;
+          })
+        ]
+      },
+      {
+        name: 'ASCII_ART',
+        patterns8: [
+          // Tone 0: Solid blocks (hash '#')
+          [
+            1,1,0,1,1,0,1,1,
+            1,1,0,1,1,0,1,1,
+            1,1,1,1,1,1,1,1,
+            1,1,0,1,1,0,1,1,
+            1,1,0,1,1,0,1,1,
+            1,1,1,1,1,1,1,1,
+            1,1,0,1,1,0,1,1,
+            1,1,0,1,1,0,1,1
+          ],
+          // Tone 1: Letter 'o'
+          [
+            0,0,1,1,1,1,0,0,
+            0,1,1,0,0,1,1,0,
+            1,1,0,0,0,0,1,1,
+            1,1,0,0,0,0,1,1,
+            1,1,0,0,0,0,1,1,
+            1,1,0,0,0,0,1,1,
+            0,1,1,0,0,1,1,0,
+            0,0,1,1,1,1,0,0
+          ],
+          // Tone 2: Colon ':'
+          [
+            0,0,0,0,0,0,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,0,0,0,0,0,0
+          ],
+          // Tone 3: Period '.'
+          [
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,0,1,1,0,0,0
+          ]
+        ],
+        patterns16: [
+          // Slot 0: Matrix code letters
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const charData = [
+              0x3c, 0x66, 0x6e, 0x76, 0x66, 0x66, 0x3c, 0x00,
+              0x7e, 0x06, 0x0c, 0x18, 0x30, 0x60, 0x7e, 0x00
+            ];
+            const subY = y % 8;
+            const charIdx = Math.floor(y / 8);
+            const row = charData[charIdx * 8 + subY];
+            return (row & (1 << (7 - (x % 8)))) ? 1 : 0;
+          }),
+          // Slot 1: Digital 7-segments numbers
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const lx = x % 8; const ly = y % 8;
+            const isHorizontal = (ly === 0 || ly === 4 || ly === 7) && (lx > 0 && lx < 6);
+            const isVertical = (lx === 0 || lx === 6) && (ly !== 0 && ly !== 4 && ly !== 7);
+            return (isHorizontal || isVertical) ? 1 : 0;
+          }),
+          // Slot 2: Tetris Blocks
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const bx = Math.floor(x / 8); const by = Math.floor(y / 8);
+            const lx = x % 8; const ly = y % 8;
+            if (bx === 0 && by === 0) return (lx >= 2 && lx < 6 && ly >= 2 && ly < 6) ? 1 : 0;
+            if (bx === 1 && by === 0) return (lx >= 3 && lx < 5 && ly >= 1 && ly < 7) ? 1 : 0;
+            if (bx === 0 && by === 1) return (ly === 4 && lx >= 2 && lx < 6) || (ly === 3 && lx === 4) ? 1 : 0;
+            return (lx === 3 && ly >= 2 && ly < 6) || (lx === 4 && ly === 5) ? 1 : 0;
+          }),
+          // Slot 3: Space-invader character
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const lx = x % 8; const ly = y % 8;
+            const invader = [
+              0b00011000,
+              0b00111100,
+              0b01111110,
+              0b11011011,
+              0b11111111,
+              0b00100100,
+              0b01011010,
+              0b10100101
+            ];
+            return (invader[ly] & (1 << (7 - lx))) ? 1 : 0;
+          })
+        ]
+      },
+      {
+        name: 'ORGANIC_NOISE',
+        patterns8: [
+          // Tone 0: sand texture
+          [
+            1,0,1,0,0,1,0,1,
+            0,1,0,1,1,0,1,0,
+            1,0,0,1,0,1,0,1,
+            0,1,1,0,1,0,1,0,
+            1,0,1,0,0,1,0,1,
+            0,1,0,1,1,0,1,0,
+            1,0,0,1,0,1,0,1,
+            0,1,1,0,1,0,1,0
+          ],
+          // Tone 1: woven fabric
+          [
+            1,1,0,0,1,1,0,0,
+            1,1,0,0,1,1,0,0,
+            0,0,1,1,0,0,1,1,
+            0,0,1,1,0,0,1,1,
+            1,1,0,0,1,1,0,0,
+            1,1,0,0,1,1,0,0,
+            0,0,1,1,0,0,1,1,
+            0,0,1,1,0,0,1,1
+          ],
+          // Tone 2: woodgrain lines
+          [
+            1,1,0,0,0,0,1,1,
+            1,0,0,0,0,1,1,0,
+            0,0,0,0,1,1,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,1,1,0,0,0,0,
+            0,1,1,0,0,0,0,1,
+            1,1,0,0,0,0,1,1,
+            1,0,0,0,0,1,1,0
+          ],
+          // Tone 3: stippling
+          [
+            0,0,0,0,1,0,0,0,
+            1,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,1,0,
+            0,0,1,0,0,0,0,0,
+            0,0,0,0,0,1,0,0,
+            0,1,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,1,
+            0,0,0,1,0,0,0,0
+          ]
+        ],
+        patterns16: [
+          // Slot 0: Perlin threshold
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const n = Math.sin(x * 0.4) + Math.sin(y * 0.4) + Math.sin((x+y)*0.3);
+            return n > 0.5 ? 1 : 0;
+          }),
+          // Slot 1: Cellular Voronoi borders
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const centers = [[4,4], [12,4], [4,12], [12,12]];
+            const dists = centers.map(c => Math.sqrt((x-c[0])**2 + (y-c[1])**2));
+            const sorted = [...dists].sort((a,b) => a-b);
+            return (sorted[1] - sorted[0] < 1.2) ? 1 : 0;
+          }),
+          // Slot 2: Cellular cracks
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            return (x * 7 + y * 13) % 29 === 0 ? 1 : 0;
+          }),
+          // Slot 3: Random rain streaks
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            return (x * 17 + y * 31) % 19 === 0 && (y % 2 === 0) ? 1 : 0;
+          })
+        ]
+      },
+      {
+        name: 'RETRO_CONSOLE',
+        patterns8: [
+          // Tone 0: LCD screen frame grid
+          [
+            1,1,1,1,1,1,1,1,
+            1,0,0,0,0,0,0,1,
+            1,0,0,0,0,0,0,1,
+            1,0,0,0,0,0,0,1,
+            1,0,0,0,0,0,0,1,
+            1,0,0,0,0,0,0,1,
+            1,0,0,0,0,0,0,1,
+            1,1,1,1,1,1,1,1
+          ],
+          // Tone 1: Scanline vertical dense
+          [
+            1,0,1,0,1,0,1,0,
+            1,0,1,0,1,0,1,0,
+            1,0,1,0,1,0,1,0,
+            1,0,1,0,1,0,1,0,
+            1,0,1,0,1,0,1,0,
+            1,0,1,0,1,0,1,0,
+            1,0,1,0,1,0,1,0,
+            1,0,1,0,1,0,1,0
+          ],
+          // Tone 2: Scanline horizontal thick
+          [
+            1,1,1,1,1,1,1,1,
+            1,1,1,1,1,1,1,1,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            1,1,1,1,1,1,1,1,
+            1,1,1,1,1,1,1,1,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0
+          ],
+          // Tone 3: CRT subpixel corners
+          [
+            1,0,0,0,0,0,0,1,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            1,0,0,0,0,0,0,1
+          ]
+        ],
+        patterns16: [
+          // Slot 0: Gameboy Pocket camera dither matrix
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            return (x % 4 === 0 && y % 2 === 0) || (x % 2 === 0 && y % 4 === 0) ? 1 : 0;
+          }),
+          // Slot 1: Shadowmask CRT pattern
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const rowOffset = (Math.floor(y / 3) % 2) * 2;
+            return (x + rowOffset) % 4 === 0 && y % 3 !== 0 ? 1 : 0;
+          }),
+          // Slot 2: Analog TV scanlines
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            if (y % 4 === 0) return 1;
+            return (x * 19 + y * 7) % 37 === 0 ? 1 : 0;
+          }),
+          // Slot 3: Vectrex vector lines
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            return (x === y || x === 15 - y) && (x % 2 === 0) ? 1 : 0;
+          })
+        ]
+      },
+      {
+        name: 'DOT_DANCE',
+        patterns8: [
+          // Tone 0: Smiley face
+          [
+            0,0,0,0,0,0,0,0,
+            0,1,1,0,0,1,1,0,
+            0,1,1,0,0,1,1,0,
+            0,0,0,0,0,0,0,0,
+            1,0,0,0,0,0,0,1,
+            0,1,1,1,1,1,1,0,
+            0,0,1,1,1,1,0,0,
+            0,0,0,0,0,0,0,0
+          ],
+          // Tone 1: Pixel Heart
+          [
+            0,0,0,0,0,0,0,0,
+            0,1,1,0,0,1,1,0,
+            1,1,1,1,1,1,1,1,
+            1,1,1,1,1,1,1,1,
+            0,1,1,1,1,1,1,0,
+            0,0,1,1,1,1,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,0,0,0,0,0,0
+          ],
+          // Tone 2: Twinkling Star
+          [
+            0,0,0,1,1,0,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,1,1,1,1,0,0,
+            1,1,1,1,1,1,1,1,
+            1,1,1,1,1,1,1,1,
+            0,0,1,1,1,1,0,0,
+            0,0,0,1,1,0,0,0,
+            0,0,0,1,1,0,0,0
+          ],
+          // Tone 3: Cute skull / ghost outline
+          [
+            0,0,1,1,1,1,0,0,
+            0,1,1,1,1,1,1,0,
+            1,0,1,1,1,1,0,1,
+            1,1,0,1,1,0,1,1,
+            1,1,1,1,1,1,1,1,
+            0,1,0,1,1,0,1,0,
+            0,1,1,0,0,1,1,0,
+            0,0,0,0,0,0,0,0
+          ]
+        ],
+        patterns16: [
+          // Slot 0: Pixel Character
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const lx = x % 8; const ly = y % 8;
+            const sprite = [
+              0b00111100,
+              0b01111110,
+              0b11011011,
+              0b11111111,
+              0b01111110,
+              0b01011010,
+              0b10000001,
+              0b01000010
+            ];
+            return (sprite[ly] & (1 << (7 - lx))) ? 1 : 0;
+          }),
+          // Slot 1: Life Heart & Coin UI
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            if (x < 8) {
+              const hx = x; const hy = y - 4;
+              const heart = [
+                0b01101100,
+                0b11111110,
+                0b11111110,
+                0b01111100,
+                0b00111000,
+                0b00010000
+              ];
+              return (hy >= 0 && hy < 6 && (heart[hy] & (1 << (7 - hx)))) ? 1 : 0;
+            } else {
+              const cx = x - 12; const cy = y - 7.5;
+              const r = Math.sqrt(cx*cx + cy*cy);
+              return (r < 3.5 && r > 2.5) || (r < 1.0) ? 1 : 0;
+            }
+          }),
+          // Slot 2: Bubble chat balloon
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const isFrame = (x > 2 && x < 13 && (y === 3 || y === 11)) || (y > 3 && y < 11 && (x === 2 || x === 13));
+            const isTail = (x === 4 && y === 12) || (x === 5 && y === 11);
+            const isExcl = x === 7.5 && ((y >= 5 && y <= 7) || y === 9);
+            return (isFrame || isTail || isExcl) ? 1 : 0;
+          }),
+          // Slot 3: Retro Pointer finger
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const finger = [
+              0b00100000,
+              0b00100000,
+              0b00100000,
+              0b00111000,
+              0b01111100,
+              0b01111100,
+              0b01111100,
+              0b00111000
+            ];
+            const fx = x - 4; const fy = y - 4;
+            return (fx >= 0 && fx < 8 && fy >= 0 && fy < 8 && (finger[fy] & (1 << (7 - fx)))) ? 1 : 0;
+          })
+        ]
+      },
+      {
+        name: 'GLITCH_CORE',
+        patterns8: [
+          // Tone 0: slice lines
+          [
+            1,1,1,1,1,1,1,1,
+            0,0,0,0,0,0,0,0,
+            1,1,0,0,1,1,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,1,1,0,0,1,1,
+            0,0,0,0,0,0,0,0,
+            1,1,1,1,1,1,1,1,
+            0,0,0,0,0,0,0,0
+          ],
+          // Tone 1: static blocks
+          [
+            1,1,0,0,0,0,0,0,
+            1,1,0,0,1,1,1,1,
+            0,0,0,0,1,1,1,1,
+            0,0,0,0,0,0,0,0,
+            1,1,1,1,0,0,1,1,
+            1,1,1,1,0,0,1,1,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,1,1,0,0
+          ],
+          // Tone 2: bit flip checker
+          [
+            1,0,1,0,0,0,0,0,
+            0,0,0,0,1,0,1,0,
+            0,1,0,1,0,0,0,0,
+            0,0,0,0,0,1,0,1,
+            1,0,1,0,0,0,0,0,
+            0,0,0,0,1,0,1,0,
+            0,1,0,1,0,0,0,0,
+            0,0,0,0,0,1,0,1
+          ],
+          // Tone 3: single diagonal slice
+          [
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            1,1,1,1,1,1,1,1,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0
+          ]
+        ],
+        patterns16: [
+          // Slot 0: Corrupted barcode
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const sliceY = Math.floor(y / 4);
+            const shift = (sliceY % 2 === 0) ? 2 : -2;
+            const shiftedX = (x + shift + 16) % 16;
+            return (shiftedX % 3 === 0) ? 1 : 0;
+          }),
+          // Slot 1: Broken electrical circuits
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            return (x === 4 || x === 11 || y === 4 || y === 11) && !((x > 6 && x < 9) || (y > 6 && y < 9)) ? 1 : 0;
+          }),
+          // Slot 2: Glitched font glyph fragments
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            return ((x > 2 && x < 6) && (y > 2 && y < 13)) || ((x > 9 && x < 13) && (y > 2 && y < 13)) || (y === 7.5 && x > 2 && x < 13) ? (x % 2 === 0 && y % 2 === 0 ? 0 : 1) : 0;
+          }),
+          // Slot 3: TV Interlace sync loss
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const shift = Math.floor(Math.sin(y * 1.5) * 3);
+            return ((x + shift + 16) % 8 === 0) && (y % 2 === 0) ? 1 : 0;
+          })
+        ]
+      },
+      {
+        name: 'PLAYGROUND',
+        patterns8: [
+          // Tone 0: Puzzle piece
+          [
+            0,0,1,1,1,1,0,0,
+            0,1,1,0,0,1,1,0,
+            1,1,0,0,0,0,1,1,
+            1,1,0,0,0,0,1,1,
+            0,1,1,1,1,1,1,0,
+            0,1,1,1,1,1,1,0,
+            0,0,1,1,1,1,0,0,
+            0,0,0,0,0,0,0,0
+          ],
+          // Tone 1: Cycle arrows
+          [
+            0,1,1,1,1,0,0,0,
+            0,1,0,0,1,1,0,0,
+            0,1,0,0,0,1,0,0,
+            0,1,1,1,0,1,0,0,
+            0,0,1,0,0,1,0,0,
+            0,0,1,0,0,1,0,0,
+            0,0,1,1,1,1,0,0,
+            0,0,0,0,0,0,0,0
+          ],
+          // Tone 2: OX patterns
+          [
+            1,0,0,1,0,1,1,0,
+            0,1,1,0,1,0,0,1,
+            0,1,1,0,1,0,0,1,
+            1,0,0,1,0,1,1,0,
+            0,1,1,0,1,0,0,1,
+            1,0,0,1,0,1,1,0,
+            1,0,0,1,0,1,1,0,
+            0,1,1,0,1,0,0,1
+          ],
+          // Tone 3: Cherry fruit
+          [
+            0,0,0,0,1,0,0,0,
+            0,0,0,1,0,0,0,0,
+            0,0,1,0,0,1,0,0,
+            0,1,0,0,1,0,1,0,
+            1,1,0,0,1,1,0,0,
+            1,1,0,0,1,1,0,0,
+            0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0
+          ]
+        ],
+        patterns16: [
+          // Slot 0: Maze walls
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            return (x % 4 === 0 && y > 2 && y < 13) || (y % 4 === 0 && x > 2 && x < 13) ? 1 : 0;
+          }),
+          // Slot 1: Brick breaker layout
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            const isBricks = (y >= 2 && y <= 6) && (x % 4 !== 0) && (y % 2 !== 0);
+            const isPaddle = (y === 13) && (x >= 5 && x <= 10);
+            const isBall = (x === 7 && y === 10);
+            return (isBricks || isPaddle || isBall) ? 1 : 0;
+          }),
+          // Slot 2: Stardust trail
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            return (x * y) % 17 === 3 ? 1 : 0;
+          }),
+          // Slot 3: Retro controller D-pad & Buttons
+          Array(256).fill(0).map((_, i) => {
+            const x = i % 16; const y = Math.floor(i / 16);
+            if (x < 8) {
+              const cx = x - 3.5; const cy = y - 7.5;
+              return (Math.abs(cx) < 2.5 && Math.abs(cy) < 1.0) || (Math.abs(cy) < 2.5 && Math.abs(cx) < 1.0) ? 1 : 0;
+            } else {
+              const d1 = Math.sqrt((x - 10.5)**2 + (y - 9.5)**2);
+              const d2 = Math.sqrt((x - 13.5)**2 + (y - 7.5)**2);
+              return (d1 < 1.5 || d2 < 1.5) ? 1 : 0;
+            }
+          })
+        ]
+      }
     ];
 
     // Premium Industrial Palettes (indexed color maps)
@@ -126,7 +1107,8 @@ export class App {
 
   // Active pattern set getter based on current pattern size
   get patterns() {
-    return this.patternSize === 8 ? this.patterns8 : this.patterns16;
+    const preset = this.presets[this.activePresetIndex];
+    return this.patternSize === 8 ? preset.patterns8 : preset.patterns16;
   }
 
   // Active single pattern data being edited
@@ -161,6 +1143,12 @@ export class App {
 
     // Synchronize custom color pickers with initial palette colors
     this.updateColorPickersUI();
+
+    // Set initial preset label
+    const label = document.getElementById('pattern-preset-label');
+    if (label) {
+      label.textContent = this.presets[this.activePresetIndex].name;
+    }
 
     // Resize snapping
     this.handleResize();
@@ -197,6 +1185,15 @@ export class App {
       headerGridToggle.addEventListener('click', () => {
         const nextSize = this.patternSize === 8 ? 16 : 8;
         this.setGridSize(nextSize);
+      });
+    }
+
+    // Pattern Preset Toggle (metadata-feed in normal view)
+    const headerPresetToggle = document.getElementById('header-pattern-preset-toggle');
+    if (headerPresetToggle) {
+      headerPresetToggle.addEventListener('click', () => {
+        const nextPreset = (this.activePresetIndex + 1) % this.presets.length;
+        this.setPreset(nextPreset);
       });
     }
 
@@ -493,6 +1490,26 @@ export class App {
     this.editorUI.initMiniGrids();
     this.onPatternChanged();
     this.log(`SYS: GRID CONFIG CHANGED TO ${size}x${size}`);
+  }
+
+  setPreset(index) {
+    this.activePresetIndex = index;
+    const label = document.getElementById('pattern-preset-label');
+    if (label) {
+      label.textContent = this.presets[index].name;
+    }
+
+    // Refresh UI & Renderer
+    if (this.editorUI) {
+      if (this.editorUI.isEditMode) {
+        this.editorUI.initGrid();
+        this.editorUI.updateGridFromState();
+      } else {
+        this.editorUI.updateMiniGrids();
+      }
+    }
+    this.onPatternChanged();
+    this.log(`SYS: PATTERN PRESET CHANGED TO [${this.presets[index].name}]`);
   }
 
   setPalette(index) {
