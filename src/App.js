@@ -1608,6 +1608,21 @@ export class App {
   // Handle snapping of the aspect-boxes to integer multiples of 80px
   handleResize() {
     const isMobile = window.innerWidth <= 768;
+
+    // Equalize footer heights on desktop
+    const footers = document.querySelectorAll('.section-footer');
+    if (footers.length === 2) {
+      footers[0].style.height = 'auto';
+      footers[1].style.height = 'auto';
+      if (!isMobile) {
+        const h0 = footers[0].offsetHeight;
+        const h1 = footers[1].offsetHeight;
+        const maxH = Math.max(h0, h1);
+        footers[0].style.height = `${maxH}px`;
+        footers[1].style.height = `${maxH}px`;
+      }
+    }
+
     const wrappers = document.querySelectorAll('.visual-wrapper');
     const isEditing = document.getElementById('app')?.classList.contains('mode-editing');
 
@@ -1665,11 +1680,11 @@ export class App {
     });
 
     // Notify Renderer of new canvas resolution to update target buffer
+    // Keep rendering resolution fixed at 512px to prevent dither pattern distortion,
+    // while keeping display sizing responsive via dynamic CSS styles (box.style.width)
     if (this.renderer && this.renderer.canvas) {
-      const box = this.renderer.canvas.parentElement;
-      const size = parseInt(box.style.width, 10) || 480;
-      if (this.renderer.canvas.width !== size) {
-        this.renderer.resize(size);
+      if (this.renderer.canvas.width !== 512) {
+        this.renderer.resize(512);
       }
     }
   }
@@ -1802,7 +1817,14 @@ export class App {
     const btnRecordVideo = document.getElementById('btn-record-video');
     if (btnRecordVideo) {
       btnRecordVideo.classList.remove('recording');
-      btnRecordVideo.textContent = '[ VID_REC ]';
+      btnRecordVideo.innerHTML = `
+        <svg id="icn_video" data-name="icn_video" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 7" class="btn-icon">
+          <rect fill="none" width="10" height="7"/>
+          <g id="Layer0_0_FILL" data-name="Layer0 0 FILL">
+            <path fill="currentColor" d="M9,2h-1v1h-1V1H0v6h7v-2h1v1h1v1h1V1h-1v1M2,3h-1v-1h1v1"/>
+          </g>
+        </svg>
+      `;
     }
   }
 }

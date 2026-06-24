@@ -11,6 +11,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#0d0d0d">
     <link rel="manifest" href="./manifest.json?v=2">
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png">
     
     <!-- Technical & Monospace Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,6 +23,11 @@
       <!-- Top Technical Header -->
       <header class="panel-header border-bottom">
         <div class="header-left">
+          <svg id="pxCum_icn" data-name="pxCum_icn" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" class="header-logo-icon">
+            <g id="Layer0_0_FILL" data-name="Layer0 0 FILL">
+              <path fill="currentColor" d="M7,2h1V0h-2v1h-1V0h-2v1h-1V0H0v2h1v1H0v2h1v1H0v2h2v-1h1v1h2v-1h1v1h2v-2h-1v-1h1v-2h-1v-1M5,3h1v1h-1v-1M2,4v-1h1v1h-1Z"/>
+            </g>
+          </svg>
           <h1 class="tech-title">PX-FILTER // DEVICE: CAM_SYS_01</h1>
         </div>
         <div class="header-right">
@@ -57,8 +63,21 @@
 
           <div class="section-footer border-top">
             <div class="capture-controls border-bottom" id="capture-controls">
-              <button id="btn-capture-still" class="btn-tech">[ STILL_CAP ]</button>
-              <button id="btn-record-video" class="btn-tech">[ VID_REC ]</button>
+              <button id="btn-capture-still" class="btn-tech" title="Capture Still">
+                <svg id="icn_camera" data-name="icn_camera" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 7" class="btn-icon">
+                  <g id="Layer0_0_FILL" data-name="Layer0 0 FILL">
+                    <path fill="currentColor" d="M8,1V0h-2v1H0v6h10V1h-2M6,3h1v2h-1v1h-2v-1h-1v-2h1v-1h2v1M6,3h-2v2h2v-2Z"/>
+                  </g>
+                </svg>
+              </button>
+              <button id="btn-record-video" class="btn-tech" title="Record Video">
+                <svg id="icn_video" data-name="icn_video" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 7" class="btn-icon">
+                  <rect fill="none" width="10" height="7"/>
+                  <g id="Layer0_0_FILL" data-name="Layer0 0 FILL">
+                    <path fill="currentColor" d="M9,2h-1v1h-1V1H0v6h7v-2h1v1h1v1h1V1h-1v1M2,3h-1v-1h1v1"/>
+                  </g>
+                </svg>
+              </button>
             </div>
 
             <div class="tech-data">
@@ -96,17 +115,19 @@
         <!-- Right Side: Pattern Editor -->
         <section class="panel-section" id="editor-section">
           <div class="section-header border-bottom">
-            <span class="section-tag">[ 02 / MASK_DESIGNER ]</span>
-            <div class="header-metadata-group">
-              <span class="metadata-feed clickable" id="header-pattern-preset-toggle">PATTERN: <span id="pattern-preset-label">DEFAULT</span></span>
-              <span class="metadata-feed clickable" id="header-grid-size-toggle">GRID: <span id="grid-size-label">8x8</span></span>
+            <!-- Normal Mode Header Content -->
+            <div id="editor-header-normal" class="header-content-wrapper">
+              <span class="section-tag">[ 02 / MASK_DESIGNER ]</span>
+              <div class="header-metadata-group">
+                <span class="metadata-feed clickable" id="header-pattern-preset-toggle">PATTERN: <span id="pattern-preset-label">DEFAULT</span></span>
+                <span class="metadata-feed clickable" id="header-grid-size-toggle">GRID: <span id="grid-size-label">8x8</span></span>
+              </div>
             </div>
-          </div>
-
-          <!-- Edit View Header (Located outside the aspect box to prevent canvas distortion) -->
-          <div id="editor-edit-header" class="edit-header border-bottom hidden">
-            <button id="btn-back-to-list" class="btn-tech">◀ RETURN</button>
-            <span id="active-edit-tag" class="section-tag">EDIT: TONE 1</span>
+            <!-- Edit Mode Header Content -->
+            <div id="editor-header-edit" class="header-content-wrapper hidden">
+              <button id="btn-back-to-list" class="btn-tech" style="padding: 2px 8px; font-size: 0.75rem;">◀ RETURN</button>
+              <span id="active-edit-tag" class="section-tag">EDIT: TONE 1</span>
+            </div>
           </div>
 
           <div class="visual-wrapper">
@@ -140,20 +161,21 @@
             </div>
           </div>
 
-          <div id="editor-controls-panel" class="editor-controls border-top border-bottom hidden">
-            <button id="btn-clear" class="btn-tech">CLEAR_GRID</button>
-            <button id="btn-invert" class="btn-tech">INVERT_GRID</button>
-            <div class="toggle-container">
-              <span class="toggle-label">GRID_SIZE:</span>
-              <button id="btn-toggle-grid-size" class="btn-tech font-bold">8x8</button>
+          <div class="section-footer border-top">
+            <!-- Edit Mode Controls inside Footer -->
+            <div id="editor-controls-panel" class="editor-controls-inner border-bottom hidden" style="padding-bottom: 8px; margin-bottom: 8px;">
+              <button id="btn-clear" class="btn-tech">CLEAR_GRID</button>
+              <button id="btn-invert" class="btn-tech">INVERT_GRID</button>
+              <div class="toggle-container">
+                <span class="toggle-label">GRID_SIZE:</span>
+                <button id="btn-toggle-grid-size" class="btn-tech font-bold">8x8</button>
+              </div>
             </div>
-          </div>
 
-          <div class="section-footer">
             <div class="render-controls border-bottom" style="padding-bottom: 8px; margin-bottom: 8px;">
               <div class="control-group">
                 <label for="slider-threshold">THRESH:</label>
-                <input type="range" id="slider-threshold" min="0.01" max="0.5" step="0.01" value="0.20">
+                <input type="range" id="slider-threshold" min="0" max="0.5" step="0.01" value="0.20">
                 <span id="val-threshold" class="slider-val">0.20</span>
               </div>
               <div class="control-group">
@@ -193,33 +215,11 @@
         <!-- Technical Details & Barcode -->
         <div class="footer-left">
           <div class="barcode-container">
-            <svg class="barcode-svg" viewBox="0 0 100 20" xmlns="http://www.w3.org/2000/svg">
-              <!-- Fake industrial barcode -->
-              <rect x="0" y="0" width="3" height="20" fill="currentColor"/>
-              <rect x="5" y="0" width="1" height="20" fill="currentColor"/>
-              <rect x="8" y="0" width="2" height="20" fill="currentColor"/>
-              <rect x="12" y="0" width="4" height="20" fill="currentColor"/>
-              <rect x="18" y="0" width="1" height="20" fill="currentColor"/>
-              <rect x="21" y="0" width="3" height="20" fill="currentColor"/>
-              <rect x="26" y="0" width="2" height="20" fill="currentColor"/>
-              <rect x="30" y="0" width="1" height="20" fill="currentColor"/>
-              <rect x="33" y="0" width="5" height="20" fill="currentColor"/>
-              <rect x="40" y="0" width="2" height="20" fill="currentColor"/>
-              <rect x="44" y="0" width="1" height="20" fill="currentColor"/>
-              <rect x="47" y="0" width="3" height="20" fill="currentColor"/>
-              <rect x="52" y="0" width="4" height="20" fill="currentColor"/>
-              <rect x="58" y="0" width="1" height="20" fill="currentColor"/>
-              <rect x="61" y="0" width="2" height="20" fill="currentColor"/>
-              <rect x="65" y="0" width="3" height="20" fill="currentColor"/>
-              <rect x="70" y="0" width="1" height="20" fill="currentColor"/>
-              <rect x="73" y="0" width="5" height="20" fill="currentColor"/>
-              <rect x="80" y="0" width="2" height="20" fill="currentColor"/>
-              <rect x="84" y="0" width="4" height="20" fill="currentColor"/>
-              <rect x="90" y="0" width="1" height="20" fill="currentColor"/>
-              <rect x="93" y="0" width="3" height="20" fill="currentColor"/>
-              <rect x="98" y="0" width="2" height="20" fill="currentColor"/>
+            <svg id="m7kenji" data-name="m7kenji" class="barcode-svg" viewBox="0 0 253.2 201.9" xmlns="http://www.w3.org/2000/svg">
+              <g id="m7kenji-group" data-name="m7kenji">
+                <polygon fill="currentColor" fill-rule="evenodd" points="253.2 181.3 236.1 181.3 236.1 201.9 181.4 201.9 181.4 181.3 164.3 181.3 164.3 92.4 147.2 92.4 147.2 181.3 126.6 181.3 126.6 201.9 71.9 201.9 71.9 181.3 54.8 181.3 54.8 92.4 37.7 92.4 37.7 201.9 0 201.9 0 71.8 20.6 71.8 20.6 54.7 71.9 54.7 71.9 71.8 92.4 71.8 92.4 164.2 109.6 164.2 109.6 71.8 126.6 71.8 126.6 54.7 181.4 54.7 181.4 71.8 201.9 71.8 201.9 164.2 219 164.2 219 54.7 201.9 54.7 201.9 37.6 0 37.6 0 0 219 0 219 0 219 20.5 236.1 20.5 236.1 37.6 253.2 37.6 253.2 181.3"/>
+              </g>
             </svg>
-            <span class="barcode-text">SYS-ID-596645D7</span>
           </div>
           <div class="system-logs">
             <span class="log-title">[SYSTEM_LOG]:</span>

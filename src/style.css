@@ -102,6 +102,13 @@ body {
   gap: 12px;
 }
 
+.header-logo-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--accent-color);
+  flex-shrink: 0;
+}
+
 .tech-title {
   font-size: 1.1rem;
   font-weight: 700;
@@ -221,7 +228,6 @@ body {
   position: relative;
   background-color: var(--bg-color);
   border: 1px solid var(--border-color);
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -586,8 +592,8 @@ body {
 }
 
 .barcode-svg {
-  width: 110px;
-  height: 25px;
+  width: auto;
+  height: 35px;
 }
 
 .barcode-text {
@@ -718,7 +724,6 @@ body {
   background-color: var(--bg-color);
   border: 1px solid var(--border-color);
   transition: .2s;
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
 }
 
 .switch-slider:before {
@@ -730,7 +735,6 @@ body {
   bottom: 3px;
   background-color: var(--text-muted);
   border: 1px solid var(--border-color);
-  box-shadow: 0 2px 2px rgba(0,0,0,0.5);
   transition: .2s;
 }
 
@@ -786,6 +790,8 @@ input:focus + .switch-slider {
 
 .mini-grid {
   flex: 1;
+  aspect-ratio: 1 / 1;
+  align-self: center;
   display: grid;
   grid-template-columns: repeat(var(--grid-size, 8), 1fr);
   grid-template-rows: repeat(var(--grid-size, 8), 1fr);
@@ -1055,4 +1061,26 @@ input:focus + .switch-slider {
     aspect-ratio: 1 / 1;
     flex: 1; /* Stretch naturally while maintaining square aspect-ratio */
   }
+}
+
+/* Aligning layout wrappers */
+.header-content-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+}
+
+.editor-controls-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.btn-icon {
+  height: 12px;
+  width: auto;
+  display: block;
 }

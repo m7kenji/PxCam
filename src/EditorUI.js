@@ -5,7 +5,8 @@ export class EditorUI {
     this.previewContainer = document.getElementById('editor-preview-view');
     this.editContainer = document.getElementById('editor-edit-view');
     this.controlsPanel = document.getElementById('editor-controls-panel');
-    this.editHeader = document.getElementById('editor-edit-header');
+    this.editHeaderNormal = document.getElementById('editor-header-normal');
+    this.editHeaderEdit = document.getElementById('editor-header-edit');
     
     this.isDrawing = false;
     this.drawMode = 1; // 1 = paint (draw), 0 = erase
@@ -56,7 +57,8 @@ export class EditorUI {
     if (this.previewContainer) this.previewContainer.classList.add('hidden');
     if (this.editContainer) this.editContainer.classList.remove('hidden');
     if (this.controlsPanel) this.controlsPanel.classList.remove('hidden');
-    if (this.editHeader) this.editHeader.classList.remove('hidden');
+    if (this.editHeaderNormal) this.editHeaderNormal.classList.add('hidden');
+    if (this.editHeaderEdit) this.editHeaderEdit.classList.remove('hidden');
 
     // Add editing mode class to root for responsive flex layout transition
     const appEl = document.getElementById('app');
@@ -79,7 +81,8 @@ export class EditorUI {
     if (this.previewContainer) this.previewContainer.classList.remove('hidden');
     if (this.editContainer) this.editContainer.classList.add('hidden');
     if (this.controlsPanel) this.controlsPanel.classList.add('hidden');
-    if (this.editHeader) this.editHeader.classList.add('hidden');
+    if (this.editHeaderNormal) this.editHeaderNormal.classList.remove('hidden');
+    if (this.editHeaderEdit) this.editHeaderEdit.classList.add('hidden');
 
     // Remove editing mode class from root
     const appEl = document.getElementById('app');
