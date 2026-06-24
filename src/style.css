@@ -219,6 +219,17 @@ body {
   overflow: hidden;
 }
 
+/* Drag & Drop Active States */
+.visual-wrapper.drag-active {
+  background-color: rgba(var(--accent-rgb), 0.05);
+}
+
+.visual-wrapper.drag-active .aspect-box {
+  border: 1px dashed var(--accent-color) !important;
+  box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.25);
+}
+
+
 .aspect-box {
   aspect-ratio: 1 / 1;
   width: 100%;

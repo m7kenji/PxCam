@@ -1363,6 +1363,67 @@ export class App {
         this.log(`SYS: TARGET FRAME RATE LIMIT SET TO ${next} FPS`);
       });
     }
+
+    // Camera Feed Drag & Drop / Copy-Paste custom image inputs
+    const cameraWrapper = document.querySelector('#camera-section .visual-wrapper');
+    if (cameraWrapper) {
+      cameraWrapper.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        cameraWrapper.classList.add('drag-active');
+      });
+
+      cameraWrapper.addEventListener('dragover', (e) => {
+        e.preventDefault();
+      });
+
+      cameraWrapper.addEventListener('dragleave', () => {
+        cameraWrapper.classList.remove('drag-active');
+      });
+
+      cameraWrapper.addEventListener('drop', (e) => {
+        e.preventDefault();
+        cameraWrapper.classList.remove('drag-active');
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) {
+          const file = files[0];
+          if (file.type.startsWith('image/')) {
+            this.handleImageFile(file);
+          }
+        }
+      });
+
+      let isMouseOverCamera = false;
+      cameraWrapper.addEventListener('mouseenter', () => { isMouseOverCamera = true; });
+      cameraWrapper.addEventListener('mouseleave', () => { isMouseOverCamera = false; });
+
+      window.addEventListener('paste', (e) => {
+        if (!isMouseOverCamera) return;
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type.startsWith('image/')) {
+            const file = items[i].getAsFile();
+            this.handleImageFile(file);
+            e.preventDefault();
+            break;
+          }
+        }
+      });
+    }
+  }
+
+  // Load files from drop or paste event and send to camera controller
+  handleImageFile(file) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        if (this.cameraController) {
+          this.cameraController.setCustomImage(img);
+        }
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 
   setupPaletteUI() {

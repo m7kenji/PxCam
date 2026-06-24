@@ -13,6 +13,7 @@ export class CameraController {
     this.fallbackCanvas.height = 320;
     this.fallbackCtx = this.fallbackCanvas.getContext('2d');
     this.fallbackTime = 0;
+    this.customImage = null;
   }
 
   async init() {
@@ -41,9 +42,9 @@ export class CameraController {
     this.stopCamera();
     this.currentSource = sourceId;
 
-    if (sourceId === 'test_shapes' || sourceId === 'test_cloud') {
+    if (sourceId === 'test_shapes' || sourceId === 'test_cloud' || sourceId === 'custom_image') {
       this.isCameraActive = false;
-      this.app.log(`SYS: SWITCHED TO PROCEDURAL INPUT [${sourceId.toUpperCase()}]`);
+      this.app.log(`SYS: SWITCHED TO [${sourceId.toUpperCase()}]`);
       return;
     }
 
@@ -133,11 +134,74 @@ export class CameraController {
     } else {
       if (this.currentSource === 'test_cloud') {
         this.updateCloudPattern();
-      } else {
+      } else if (this.currentSource === 'test_shapes') {
         this.updateShapesPattern();
+      } else if (this.currentSource === 'custom_image') {
+        this.drawCustomImage();
       }
       return this.fallbackCanvas;
     }
+  }
+
+  // Set the custom still image from drop/paste and switch source
+  setCustomImage(img) {
+    this.stopCamera();
+    this.currentSource = 'custom_image';
+    this.isCameraActive = false;
+    this.customImage = img;
+
+    this.drawCustomImage();
+
+    // Dynamically insert '[IMAGE] CUSTOM_IMAGE' option if it doesn't exist
+    const selectCamera = document.getElementById('select-camera');
+    if (selectCamera) {
+      let customOption = selectCamera.querySelector('option[value="custom_image"]');
+      if (!customOption) {
+        customOption = document.createElement('option');
+        customOption.value = 'custom_image';
+        customOption.textContent = '[IMAGE] CUSTOM_IMAGE';
+        selectCamera.appendChild(customOption);
+      }
+      selectCamera.value = 'custom_image';
+    }
+
+    const statusMeta = document.querySelector('#camera-section .metadata-feed');
+    if (statusMeta) {
+      statusMeta.textContent = 'SYS_STATUS: CUSTOM_IMAGE';
+    }
+
+    this.app.log('IMAGE: CUSTOM SOURCE LOADED.');
+  }
+
+  // Draw scaled custom image centered on the fallbackCanvas (Fit layout)
+  drawCustomImage() {
+    if (!this.customImage) return;
+    const ctx = this.fallbackCtx;
+    const w = this.fallbackCanvas.width;
+    const h = this.fallbackCanvas.height;
+
+    // Clear background to black
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, w, h);
+
+    const img = this.customImage;
+    const imgRatio = img.width / img.height;
+    const canvasRatio = w / h;
+
+    let drawW, drawH, drawX, drawY;
+    if (imgRatio > canvasRatio) {
+      drawW = w;
+      drawH = w / imgRatio;
+      drawX = 0;
+      drawY = (h - drawH) / 2;
+    } else {
+      drawH = h;
+      drawW = h * imgRatio;
+      drawX = (w - drawW) / 2;
+      drawY = 0;
+    }
+
+    ctx.drawImage(img, drawX, drawY, drawW, drawH);
   }
 
   updateShapesPattern() {
