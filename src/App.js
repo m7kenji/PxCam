@@ -13,7 +13,7 @@ export class App {
     this.activePresetIndex = 0; // 0 to 4
     this.presets = [
       {
-        name: 'DEFAULT',
+        name: 'TYPE_A',
         patterns8: [
           // Tone 0 (Darkest - dense grid)
           [
@@ -86,7 +86,7 @@ export class App {
         ]
       },
       {
-        name: 'GRID_LINE',
+        name: 'TYPE_B',
         patterns8: [
           // Tone 0: 2x2 grid check
           [
@@ -157,7 +157,7 @@ export class App {
         ]
       },
       {
-        name: 'HALFTONE',
+        name: 'TYPE_C',
         patterns8: [
           // Tone 0: Large dot
           [
@@ -232,7 +232,7 @@ export class App {
         ]
       },
       {
-        name: 'WAVE_NOISE',
+        name: 'TYPE_D',
         patterns8: [
           // Tone 0: Zigzag wave
           [
@@ -327,7 +327,7 @@ export class App {
         ]
       },
       {
-        name: 'CYBER_TECH',
+        name: 'TYPE_E',
         patterns8: [
           // Tone 0: Checker blocks
           [
@@ -401,7 +401,7 @@ export class App {
         ]
       },
       {
-        name: 'VINTAGE_TILES',
+        name: 'TYPE_F',
         patterns8: [
           // Tone 0: brick wall
           [
@@ -476,7 +476,7 @@ export class App {
         ]
       },
       {
-        name: 'GEOMETRIC_FLOW',
+        name: 'TYPE_G',
         patterns8: [
           // Tone 0: S-curve line
           [
@@ -552,7 +552,7 @@ export class App {
         ]
       },
       {
-        name: 'ASCII_ART',
+        name: 'TYPE_H',
         patterns8: [
           // Tone 0: Solid blocks (hash '#')
           [
@@ -649,7 +649,7 @@ export class App {
         ]
       },
       {
-        name: 'ORGANIC_NOISE',
+        name: 'TYPE_I',
         patterns8: [
           // Tone 0: sand texture
           [
@@ -724,7 +724,7 @@ export class App {
         ]
       },
       {
-        name: 'RETRO_CONSOLE',
+        name: 'TYPE_J',
         patterns8: [
           // Tone 0: LCD screen frame grid
           [
@@ -797,7 +797,7 @@ export class App {
         ]
       },
       {
-        name: 'DOT_DANCE',
+        name: 'TYPE_K',
         patterns8: [
           // Tone 0: Smiley face
           [
@@ -908,7 +908,7 @@ export class App {
         ]
       },
       {
-        name: 'GLITCH_CORE',
+        name: 'TYPE_L',
         patterns8: [
           // Tone 0: slice lines
           [
@@ -983,7 +983,7 @@ export class App {
         ]
       },
       {
-        name: 'PLAYGROUND',
+        name: 'TYPE_M',
         patterns8: [
           // Tone 0: Puzzle piece
           [
@@ -1156,6 +1156,9 @@ export class App {
 
     // Render loop start
     this.startLoop();
+
+    // Trigger asynchronous search and loading of custom patterns from public/patterns/
+    this.loadPatternsFromAssets();
 
     this.log('SYS_BOOT: INITIALIZATION COMPLETE. STANDBY.');
   }
@@ -1530,6 +1533,102 @@ export class App {
     if (this.editorUI) {
       this.editorUI.updateMiniGrids();
     }
+  }
+
+  // Load custom patterns from asset files (e.g. public/patterns/DEFAULT_8.png)
+  async loadPatternsFromAssets() {
+    this.log('SYS_LOADER: SYNCHRONIZING CUSTOM PATTERNS');
+    
+    const loadPromises = [];
+    let loadedCount = 0;
+    
+    for (let presetIndex = 0; presetIndex < this.presets.length; presetIndex++) {
+      const preset = this.presets[presetIndex];
+      const presetName = preset.name;
+      
+      // Load 8x8 pattern if it exists
+      loadPromises.push(
+        this.fetchAndParsePatternImage(`./patterns/${presetName}_8.png`, 8).then(patterns => {
+          if (patterns) {
+            preset.patterns8 = patterns;
+            this.log(`SYS_LOADER: LOADED CUSTOM 8x8 FOR [${presetName}]`);
+            loadedCount++;
+          }
+        })
+      );
+      
+      // Load 16x16 pattern if it exists
+      loadPromises.push(
+        this.fetchAndParsePatternImage(`./patterns/${presetName}_16.png`, 16).then(patterns => {
+          if (patterns) {
+            preset.patterns16 = patterns;
+            this.log(`SYS_LOADER: LOADED CUSTOM 16x16 FOR [${presetName}]`);
+            loadedCount++;
+          }
+        })
+      );
+    }
+    
+    await Promise.all(loadPromises);
+    
+    if (loadedCount > 0) {
+      this.onPatternChanged();
+      this.log(`SYS_LOADER: LOADED ${loadedCount} CUSTOM TEXTURES`);
+    } else {
+      this.log('SYS_LOADER: NO CUSTOM TEXTURE OVERRIDES FOUND');
+    }
+  }
+
+  // Fetch and parse single 4-tone atlas pattern image
+  async fetchAndParsePatternImage(url, patternSize) {
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      if (!response.ok) return null;
+    } catch (e) {
+      return null;
+    }
+
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        
+        const expectedWidth = patternSize * 4;
+        const expectedHeight = patternSize;
+        if (img.width !== expectedWidth || img.height !== expectedHeight) {
+          console.warn(`SYS_LOADER: Image size mismatch for ${url}. Expected ${expectedWidth}x${expectedHeight}, got ${img.width}x${img.height}`);
+          resolve(null);
+          return;
+        }
+
+        const imgData = ctx.getImageData(0, 0, img.width, img.height).data;
+        const patterns = [];
+        
+        for (let s = 0; s < 4; s++) {
+          const pattern = [];
+          for (let y = 0; y < patternSize; y++) {
+            for (let x = 0; x < patternSize; x++) {
+              const px = s * patternSize + x;
+              const idx = (y * img.width + px) * 4;
+              const r = imgData[idx];
+              const g = imgData[idx + 1];
+              const b = imgData[idx + 2];
+              const brightness = (r + g + b) / 3;
+              pattern.push(brightness > 127 ? 1 : 0);
+            }
+          }
+          patterns.push(pattern);
+        }
+        resolve(patterns);
+      };
+      img.onerror = () => resolve(null);
+      img.src = url;
+    });
   }
 
   // Pack the 4 patterns into a single Uint8Array for WebGL texture upload (2D Row-by-Row layout)
